@@ -4,10 +4,12 @@ import datetime
 import time
 import random
 from openai_client import get_openai_response
+from flask_cors import CORS
 
 
 app = Flask(__name__)
-sockets = Sockets(app)
+CORS(app)  # 啟用 CORS
+# sockets = Sockets(app)
 
 
 # @sockets.route('/echo')
