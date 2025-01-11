@@ -3,15 +3,94 @@
 // import HelloWorld from './components/HelloWorld.vue'
 import Navbar from './components/Navbar.vue'
 import ChatWindows from './components/ChatWindows.vue'
+import { db } from '../src/config/firebase'
+import { collection ,addDoc } from 'firebase/firestore'
 
 //輸入框
 import { ref } from 'vue'
 import { ElButton, ElInput } from 'element-plus'
 const text = ref('')
 
+
+// const handleClick = () => {
+//   console.log('click')
+// }
+
+// create a connection to websocket server
+// ws:// 表示建立的是 WebSocket 的通訊協定
+
+// WebSocket Echo Server 運行一個免費的非常簡單的端點伺服器，支援 websockets 和伺服器傳送事件 (SSE)，因此您可以輕鬆測試您的 websockets 和 SSE 用戶端。
+// wss://echo.websocket.org/
+// const ws = new WebSocket('ws://localhost:5000/echo');
+
+// when the connection is opened
+// ws.addEventListener('open', () => {
+//   console.log('connected');
+//   // presence.textContent = '🟢';
+//   setTimeout(() => {
+//     ws.send('ha你爸');
+//   }, 1000);
+//   ws.send("ha你媽");
+// });
+
+// every time socket receives a message
+// ws.addEventListener('message', (event) => {
+//   const data = event.data;
+//   // allChat = data.msg;
+//   // render();
+//   console.log("data:",data);
+// });
+
+// when the connection is closed
+// ws.addEventListener('close', () => {
+//   console.log('disconnected');
+//   // presence.textContent = '🔴';
+// });
+
+
+
+const saveMessageToFirebase = async (message) => {
+  try {
+    const docRef = await addDoc(collection(db, 'messages'), {
+      message: message,
+      timestamp: new Date()
+    });
+    console.log('Document written with ID:', docRef.id);
+  } catch (error) {
+    console.error('Error adding document:', error);
+  }
+};
+
 const handleClick = () => {
-  console.log('click')
-}
+  console.log('click', text.value);
+  // 儲存到 Firebase
+  // saveMessageToFirebase(text.value);
+  // 傳送請求到 /chat API
+  fetch('http://127.0.0.1:5000/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const contentType = response.headers.get('Content-Type');
+      if (contentType?.includes('application/json')) {
+        return response.json(); // 解析 JSON 回應
+      }
+      return response.text(); // 如果不是 JSON 回應
+    })
+    .then((data) => {
+      console.log('Response from /chat:', data || 'No response body');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+};
+
 
 </script>
 
