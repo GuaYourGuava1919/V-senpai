@@ -1,6 +1,0 @@
-Flask
-flask_sockets
-gevent
-openai
-python-dotenv
-flask-cors

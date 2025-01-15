@@ -1,0 +1,12 @@
+Flask
+flask_sockets
+gevent
+openai
+python-dotenv
+flask-cors
+pinecone
+transformers
+torch
+langchain_commuinity
+pypdf
+sentence-transformers

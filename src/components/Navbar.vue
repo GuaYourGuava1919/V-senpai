@@ -37,7 +37,7 @@
           <el-icon><setting /></el-icon>
           <span>Navigator Four</span>
         </el-menu-item>
-        <div class="avatar-nav">
+        <div class="avatar-nav" @click="handleClick">
           <div class="container">
             <el-avatar
               src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
@@ -51,12 +51,20 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import {
   Document,
   Menu as IconMenu,
   Location,
   Setting,
 } from '@element-plus/icons-vue'
+
+const router = useRouter()
+
+const handleClick = () => {
+  router.push('/signup');
+  console.log('click');
+}
 
 
 </script>

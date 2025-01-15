@@ -1,25 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_sockets import Sockets
-import datetime
-import time
-import random
-from openai_client import get_openai_response
-from flask_cors import CORS
 
+from py.openai_client import get_openai_response
+from flask_cors import CORS
+# from pinecone import Pinecone, ServerlessSpec
 
 app = Flask(__name__)
 CORS(app)  # 啟用 CORS
-# sockets = Sockets(app)
 
 
-# @sockets.route('/echo')
-# def echo_socket(ws):
-#     while not ws.closed:
-
-#         now = datetime.datetime.now().isoformat() + 'Z'
-#         ws.send(now)  #发送数据
-#         time.sleep(1)
-
+# pc = Pinecone(api_key="pcsk_VPkZN_FYg8jEj3q9F8MNzqQzBXXGhrtzRPzhY4C8A4W4mPBHCrX8eUQ8QMPTD3FZCtGFe")
 
 
 @app.route('/')
@@ -44,10 +34,3 @@ def chat():
 if __name__ == "__main__":
     app.run(debug=True)
     
-
-# if __name__ == "__main__":
-#     from gevent import pywsgi
-#     from geventwebsocket.handler import WebSocketHandler
-#     server = pywsgi.WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
-#     print('server start')
-#     server.serve_forever()
