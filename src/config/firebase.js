@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore"; // 正確導入 Firestore
 import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth"; // 正確導入 Auth
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,6 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app); // 初始化 Firestore
 const analytics = getAnalytics(app);
+const auth = getAuth(app); // 初始化 Auth
 
 // 導出模組
-export { app, db, analytics };
+export { app, db, analytics, auth }; // 導出 app, db, analytics, auth

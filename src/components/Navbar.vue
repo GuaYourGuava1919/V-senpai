@@ -58,12 +58,18 @@ import {
   Location,
   Setting,
 } from '@element-plus/icons-vue'
+import { getAuth } from 'firebase/auth';
 
 const router = useRouter()
+const auth = getAuth()
 
 const handleClick = () => {
-  router.push('/signup');
-  console.log('click');
+  auth.signOut().then(() => {
+        auth.onAuthStateChanged(() => {
+          localStorage.removeItem('token')
+          router.push('/login')
+        })
+      })
 }
 
 

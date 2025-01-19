@@ -136,7 +136,6 @@ const auth = getAuth();
             <div class="" style="display: flex; justify-content: center;" @click="handleSignUp">
                 <el-button round style="background-color: #FFA726; color: white;">註冊</el-button>
             </div>
-
         </el-card>
     </div>
 </template>

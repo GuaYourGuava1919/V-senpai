@@ -1,35 +1,70 @@
-<script>
-// import { RouterView, RouterLink } from 'vue-router'
+<script setup>
+    import { ref } from 'vue'
+    import { useRouter } from 'vue-router';
+    import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+    import { ElForm, ElFormItem, ElInput, ElSelect,ElCard,ElMessage } from 'element-plus'
+        
+        const form = ref({
+            email: '',
+            pwd: ''
+        })
 
-export default {
-//   components: { RouterView, RouterLink },
-    data() {
-        return {
-        email: '',
-        password: ''
-        }
-    }
-}
+        const auth = getAuth()
+        const router = useRouter()
 
+        const handleSignIn = () => {
+        signInWithEmailAndPassword(auth, form.value.email, form.value.pwd)
+            .then(async (userCredential) => {
+                // 登入成功，取得使用者的 ID Token
+                const user = userCredential.user;
+                const idToken = await user.getIdToken();
+
+                // console.log("JWT Token:", idToken); // Firebase 提供的 JWT Token
+                console.log("Login success");
+
+                // 這裡可以將 Token 儲存到 localStorage 或 Vuex，視需求而定
+                localStorage.setItem('token', idToken);
+
+                // 導向首頁或其他頁面
+                router.push('/');
+            })
+            .catch((error) => {
+                // 錯誤處理
+                console.error(error.message);
+                ElMessage.error("登入失敗：" + error.message);
+            });
+        };
+        
 </script>
 
 <template>
-    <div>
-        <h1>Sign In </h1>
-        <form>
-            <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" v-model="email" />
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <el-card style="max-width: 550px; background-color: #6C63FF;" shadow="always">
+
+            <el-form :model="form" label-width="auto" style="margin: 20px;">
+                <el-form-item label="電子郵件" required>
+                    <el-input v-model="form.email" />
+                </el-form-item>
+
+                <el-form-item label="密碼"  required> 
+                    <el-input v-model="form.pwd" type="password"/>
+                </el-form-item>
+            </el-form>
+
+            <div class="" style="display: flex; justify-content: center;" @click="handleSignIn">
+                <el-button round style="background-color: #FFA726; color: white;">登入
+                </el-button>
             </div>
-            <div>
-                <label for="password">Password</label>
-                <input type="password" id="password" v-model="password" />
-            </div>
-            <button type="submit">Sign In</button>
-        </form>
+
+        </el-card>
     </div>
 </template>
 
-<style lang="scss" scoped>
+
+<style lang="scss">
+
+.el-form-item__label {
+    color: #fff;
+}
 
 </style>

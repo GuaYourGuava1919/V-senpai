@@ -3,7 +3,7 @@ import HomeView from '../views/HomeView.vue'
 
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -16,11 +16,24 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
-      path: '/signup',
-      name: 'signup',
-      component: () => import('../views/SignupView.vue')
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/SignInView.vue'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/SignUpView.vue'),
     }
   ],
+})
+
+// 加入守衛
+router.beforeEach((to) => {
+  const isAuthenticated = localStorage.getItem('token')
+  if (to.name !== 'login' && !isAuthenticated) {
+    return { name: 'login' }
+  }
 })
 
 export default router

@@ -11,38 +11,6 @@ import { ElButton, ElInput } from 'element-plus'
 const text = ref('')
 
 
-// create a connection to websocket server
-// ws:// 表示建立的是 WebSocket 的通訊協定
-
-// WebSocket Echo Server 運行一個免費的非常簡單的端點伺服器，支援 websockets 和伺服器傳送事件 (SSE)，因此您可以輕鬆測試您的 websockets 和 SSE 用戶端。
-// wss://echo.websocket.org/
-// const ws = new WebSocket('ws://localhost:5000/echo');
-
-// when the connection is opened
-// ws.addEventListener('open', () => {
-//   console.log('connected');
-//   // presence.textContent = '🟢';
-//   setTimeout(() => {
-//     ws.send('ha你爸');
-//   }, 1000);
-//   ws.send("ha你媽");
-// });
-
-// every time socket receives a message
-// ws.addEventListener('message', (event) => {
-//   const data = event.data;
-//   // allChat = data.msg;
-//   // render();
-//   console.log("data:",data);
-// });
-
-// when the connection is closed
-// ws.addEventListener('close', () => {
-//   console.log('disconnected');
-//   // presence.textContent = '🔴';
-// });
-
-
 
 const saveMessageToFirebase = async (message) => {
   try {
