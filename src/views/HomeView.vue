@@ -7,17 +7,19 @@ import { collection ,addDoc } from 'firebase/firestore'
 
 //輸入框
 import { ref } from 'vue'
-import { ElButton, ElInput } from 'element-plus'
+import { ElButton, ElInput, roleTypes } from 'element-plus'
 const text = ref('')
 
+const uid = localStorage.getItem('uid')
 
-
-const saveMessageToFirebase = async (message) => {
+const saveMessageToFirebase = async (message,role) => {
   try {
-    const docRef = await addDoc(collection(db, 'messages'), {
-      message: message,
-      timestamp: new Date()
-    });
+       //儲存路徑/users/{uid}/messages/
+      const docRef = await addDoc(collection(db, `users/${uid}/messages`), {
+        message,
+        timestamp: new Date(),
+        role: role
+      });
     console.log('Document written with ID:', docRef.id);
   } catch (error) {
     console.error('Error adding document:', error);
@@ -26,8 +28,10 @@ const saveMessageToFirebase = async (message) => {
 
 const handleClick = () => {
   console.log('click', text.value);
+
   // 儲存到 Firebase
-  // saveMessageToFirebase(text.value);
+  saveMessageToFirebase(text.value, "user");
+
   // 傳送請求到 /chat API
   fetch('http://127.0.0.1:5000/chat', {
     method: 'POST',
@@ -47,7 +51,14 @@ const handleClick = () => {
       return response.text(); // 如果不是 JSON 回應
     })
     .then((data) => {
-      console.log('Response from /chat:', data || 'No response body');
+      console.log('機器人的回應', data.reply || 'No response body');
+
+      // 儲存機器人的回應到 Firebase
+      if (typeof data.reply === 'string') {
+        saveMessageToFirebase(data.reply, "bot");
+      } else if (data && data.text) {
+        saveMessageToFirebase(data.text, "bot");
+      }
     })
     .catch((error) => {
       console.error('Error:', error);
@@ -55,6 +66,7 @@ const handleClick = () => {
 
   text.value = '';
 };
+
 
 
 </script>
