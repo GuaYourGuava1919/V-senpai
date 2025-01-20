@@ -1,3 +1,41 @@
+<script setup>
+import { ref } from 'vue'
+import { onMounted } from 'vue'
+import {
+  Menu as IconMenu,
+  Setting,
+} from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { getAuth } from 'firebase/auth';
+
+import { storeToRefs } from "pinia";
+import { useAuthStore } from '@/stores/auth';
+
+const auth = getAuth()
+const router = useRouter()
+const authStore = useAuthStore()
+const {user} = storeToRefs(authStore)
+
+const userName = ref('載入中...');
+
+onMounted(async () => {
+  const uid = localStorage.getItem('uid')
+  await authStore.fetchUser(uid);
+  userName.value = user.value.name
+});
+  
+        
+//登出
+const handleClick = () => {
+    auth.signOut().then(() => {
+      auth.onAuthStateChanged(() => {
+          localStorage.removeItem('token')
+          router.push('/login')
+        })
+    })
+}
+        
+</script>
 <template>
     <div>
       <!-- <el-col :span="4"> -->
@@ -38,7 +76,7 @@
             <el-avatar
               src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
             />
-            <p>Admin</p>
+            <p>{{ userName }}</p>
           </div>
         </div>
       </el-menu> 
@@ -46,37 +84,6 @@
     </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router'
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
-} from '@element-plus/icons-vue'
-import { getAuth } from 'firebase/auth';
-import { db } from '@/config/firebase';
-
-const auth = getAuth()
-const router = useRouter()
-
-//讀取db資料
-
-// const docRef = doc(db, '', '1')
-// const docSnap = await getDoc(docRef)
-// console.log(docSnap.data())
-
-const handleClick = () => {
-  auth.signOut().then(() => {
-        auth.onAuthStateChanged(() => {
-          localStorage.removeItem('token')
-          router.push('/login')
-        })
-      })
-}
-
-
-</script>
 
 <style lang="scss" scoped>
 .el-menu-vertical-demo {

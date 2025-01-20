@@ -1,40 +1,45 @@
 <script setup>
-    import { ref } from 'vue'
-    import { useRouter } from 'vue-router';
-    import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-    import { ElForm, ElFormItem, ElInput, ElSelect,ElCard,ElMessage } from 'element-plus'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { ElForm, ElFormItem, ElInput, ElSelect,ElCard,ElMessage } from 'element-plus'
         
-        const form = ref({
-            email: '',
-            pwd: ''
+const form = ref({
+    email: '',
+    pwd: ''
+})
+
+const auth = getAuth()
+const router = useRouter()
+
+import { storeToRefs } from "pinia";
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore()
+
+const { getUser } = storeToRefs(authStore)
+
+const handleSignIn = () => {
+    signInWithEmailAndPassword(auth, form.value.email, form.value.pwd)
+        .then(async (userCredential) => {
+            // 登入成功，取得使用者的 ID Token
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+
+            console.log("Login success");
+
+            // 儲存 Token 或進一步操作
+            localStorage.setItem('token', idToken);
+            localStorage.setItem('uid', user.uid);
+
+            // 導向首頁或其他頁面
+            router.push('/');
         })
-
-        const auth = getAuth()
-        const router = useRouter()
-
-        const handleSignIn = () => {
-        signInWithEmailAndPassword(auth, form.value.email, form.value.pwd)
-            .then(async (userCredential) => {
-                // 登入成功，取得使用者的 ID Token
-                const user = userCredential.user;
-                const idToken = await user.getIdToken();
-
-                // console.log("JWT Token:", idToken); // Firebase 提供的 JWT Token
-                console.log("Login success");
-
-                // 這裡可以將 Token 儲存到 localStorage 或 Vuex，視需求而定
-                localStorage.setItem('token', idToken);
-
-                // 導向首頁或其他頁面
-                router.push('/');
-            })
-            .catch((error) => {
-                // 錯誤處理
-                
-                console.error(error.message);
-                ElMessage.error("登入失敗：" + error.message);
-            });
-        };
+        .catch((error) => {
+            // 錯誤處理
+            console.error(error.message);
+            ElMessage.error("登入失敗：" + error.message);
+        });
+};
         
 </script>
 
