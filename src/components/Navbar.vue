@@ -10,7 +10,7 @@
       >
         <el-sub-menu index="1">
           <template #title>
-            <el-icon><location /></el-icon>
+            <el-icon><icon-menu /></el-icon>
             <span>歷代學長姐</span>
           </template>
           <el-menu-item-group title="Group One">
@@ -29,13 +29,9 @@
           <el-icon><icon-menu /></el-icon>
           <span>Navigator Two</span>
         </el-menu-item>
-        <el-menu-item index="3" disabled>
-          <el-icon><document /></el-icon>
-          <span>Navigator Three</span>
-        </el-menu-item>
-        <el-menu-item index="4">
+        <el-menu-item index="3">
           <el-icon><setting /></el-icon>
-          <span>Navigator Four</span>
+          <span>設定</span>
         </el-menu-item>
         <div class="avatar-nav" @click="handleClick">
           <div class="container">
@@ -59,9 +55,16 @@ import {
   Setting,
 } from '@element-plus/icons-vue'
 import { getAuth } from 'firebase/auth';
+import { db } from '@/config/firebase';
 
-const router = useRouter()
 const auth = getAuth()
+const router = useRouter()
+
+//讀取db資料
+
+// const docRef = doc(db, '', '1')
+// const docSnap = await getDoc(docRef)
+// console.log(docSnap.data())
 
 const handleClick = () => {
   auth.signOut().then(() => {

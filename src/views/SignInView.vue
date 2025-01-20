@@ -30,6 +30,7 @@
             })
             .catch((error) => {
                 // 錯誤處理
+                
                 console.error(error.message);
                 ElMessage.error("登入失敗：" + error.message);
             });
@@ -51,10 +52,20 @@
                 </el-form-item>
             </el-form>
 
-            <div class="" style="display: flex; justify-content: center;" @click="handleSignIn">
-                <el-button round style="background-color: #FFA726; color: white;">登入
-                </el-button>
+            <div class="" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+
+                <div class="" style="display: flex; justify-content: center;" @click="handleSignIn">
+                    <el-button round style="background-color: #FFA726; color: white;">登入</el-button>
+                </div>
+
+                <!-- 沒有帳號就註冊 -->
+                <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
+                    <p>還沒有帳號？</p>
+                    <router-link to="/register">註冊</router-link>
+                </div>
+
             </div>
+            
 
         </el-card>
     </div>
