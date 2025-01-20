@@ -1,7 +1,7 @@
 import os
-
 from openai import OpenAI
 from dotenv import load_dotenv
+from vector_search import vector_search
 
 load_dotenv()
 token = os.environ.get("GITHUB_TOKEN")
@@ -18,40 +18,32 @@ client = OpenAI(
 
 def get_openai_response(user_input: str) -> str:
     try:
+        # 執行向量搜尋並取得結果
+        search_result = vector_search(user_input)
+        
+        # 提取搜尋結果中的 'combined_text'
+        combined_text = search_result.get("combined_text", "我們無法找到相關的資料，請詳細說明或重試。")
+        
+        # 向 OpenAI 提交請求，並傳遞上下文
         response = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "你是一個說中文的大學助教"},
                 {"role": "user", "content": user_input},
+                {"role": "system", "content": combined_text}
             ],
             temperature=1.0,
             top_p=1.0,
             max_tokens=1000,
             model=model_name,
         )
+        print(f"Combined:{combined_text}")
+        print(f"OpenAI response: {response.choices[0].message.content}")
+        
+        # 返回 OpenAI 回應內容
         return response.choices[0].message.content
     except Exception as e:
+        # 錯誤處理
         raise RuntimeError(f"Error from OpenAI API: {str(e)}")
 
-# response = client.chat.completions.create(
-#     messages=[
-#         {
-#             "role": "system",
-#             "content": "You are a helpful assistant.",
-#         },
-#         {
-#             "role": "user",
-#             "content": "Give me 5 good reasons why I should exercise every day.",
-#         }
-#     ],
-#     temperature=1.0,
-#     top_p=1.0,
-#     max_tokens=1000,
-#     model=model_name,
-#     stream=True
-# )
 
-# print(response.choices[0].message.content)
-
-# for update in response:
-#     if update.choices[0].delta.content:
-#         print(update.choices[0].delta.content, end="")
+get_openai_response("系統分析要注意什麼")

@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "concurrently \"vite\" \".venv\\Scripts\\python app.py\""
+    "start": "concurrently \"vite\" \".venv\\Scripts\\python backend\\app.py\""
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

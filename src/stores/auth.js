@@ -19,12 +19,12 @@ export const useAuthStore = defineStore('auth', {
 
                 if (docSnap.exists()) {
                     this.user = docSnap.data(); // 更新 Pinia 的狀態
-                    console.log(`Document data:`, this.user);
+                    // console.log(`Document data:`, this.user);
                 } else {
-                    console.log('No such document!');
+                    // console.log('No such document!');
                 }
             } catch (error) {
-                console.error('Error fetching document:', error);
+                // console.error('Error fetching document:', error);
             }
         }
 

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sockets import Sockets
 
-from py.openai_client import get_openai_response
+from openai_client import get_openai_response
 from flask_cors import CORS
 # from pinecone import Pinecone, ServerlessSpec
 
