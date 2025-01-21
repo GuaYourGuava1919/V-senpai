@@ -48,6 +48,8 @@ onMounted(() => {
     padding: 10px;
     height: 100%;
     overflow-y: auto;
+    // background-color: aqua;
+    width: 100%;
 }
 
 

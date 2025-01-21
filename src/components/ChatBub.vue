@@ -69,10 +69,10 @@
     }
     .bot_content {
       background-color: #6C63FF;
-      color: white;
+      color: #d5d5d5;
       padding: 40px;
       border-radius: 10px;
-      min-width: 500px;
+      max-width: 55%;
       overflow-x: auto;
     }
     .user_content {
@@ -80,6 +80,7 @@
       color: black;
       padding: 10px;
       border-radius: 10px;
+      max-width: 30%;
     }
     .time {
       margin: 5px;

@@ -79,7 +79,7 @@ const handleClick = () => {
     <el-col :span="20">
       <div class="" >
         <el-row style="display: flex; justify-content: center; align-items: center;">
-          <div class="" style="height: calc(100vh*0.85) ; width: 80%; padding: 30px;">
+          <div class="" style="height: calc(100vh*0.85) ; padding: 30px;">
             <!-- <h1>hello</h1> -->
             <ChatWindows />
           </div>
