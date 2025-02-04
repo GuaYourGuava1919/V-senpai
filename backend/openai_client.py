@@ -27,7 +27,7 @@ def get_openai_response(user_input: str) -> str:
         # 向 OpenAI 提交請求，並傳遞上下文
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "你是一個說中文的大學助教"},
+                {"role": "system", "content": "你是一個說中文的大學"},
                 {"role": "user", "content": user_input},
                 {"role": "system", "content": combined_text}
             ],
@@ -46,4 +46,4 @@ def get_openai_response(user_input: str) -> str:
         raise RuntimeError(f"Error from OpenAI API: {str(e)}")
 
 
-get_openai_response("系統分析要注意什麼")
+# get_openai_response("系統分析要注意什麼")

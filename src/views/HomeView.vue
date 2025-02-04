@@ -6,7 +6,7 @@ import { db } from '../config/firebase'
 import { collection ,addDoc } from 'firebase/firestore'
 
 //輸入框
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { ElButton, ElInput, roleTypes } from 'element-plus'
 const text = ref('')
 
@@ -66,6 +66,7 @@ const handleClick = () => {
 
   text.value = '';
 };
+
 
 
 
