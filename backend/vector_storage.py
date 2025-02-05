@@ -34,7 +34,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name) 
 
 # PDF 文件的路徑
-file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc1.pdf"
+file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc3.pdf"
 
 # 載入 PDF 文件
 loader = PyPDFLoader(file_path)

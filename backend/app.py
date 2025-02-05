@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_sockets import Sockets
 
-from openai_client import get_openai_response
 from flask_cors import CORS
+from openai_client import get_openai_response
+from groq_client import get_groq_response
 # from pinecone import Pinecone, ServerlessSpec
 
 app = Flask(__name__)
@@ -24,6 +25,7 @@ def chat():
         if not user_input:
             return jsonify({"error": "Message cannot be empty"}), 400
         # 呼叫 OpenAI 客戶端並獲取回應
+        # reply = get_groq_response(user_input)
         reply = get_openai_response(user_input)
         return jsonify({"reply": reply}), 200
 

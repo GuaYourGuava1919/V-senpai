@@ -12,13 +12,14 @@ const text = ref('')
 
 const uid = localStorage.getItem('uid')
 
-const saveMessageToFirebase = async (message,role) => {
+const saveMessageToFirebase = async (message,role,respondent) => {
   try {
        //儲存路徑/users/{uid}/messages/
       const docRef = await addDoc(collection(db, `users/${uid}/messages`), {
         message,
         timestamp: new Date(),
-        role: role
+        role: role,
+        respondent,
       });
     console.log('Document written with ID:', docRef.id);
   } catch (error) {
@@ -26,48 +27,55 @@ const saveMessageToFirebase = async (message,role) => {
   }
 };
 
-const handleClick = () => {
+const handleClick = async () => {
   console.log('click', text.value);
 
-  // 儲存到 Firebase
-  saveMessageToFirebase(text.value, "user");
+  // 儲存使用者訊息到 Firebase
+  await saveMessageToFirebase(text.value, "user", null);
 
-  // 傳送請求到 /chat API
-  fetch('http://127.0.0.1:5000/chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const contentType = response.headers.get('Content-Type');
-      if (contentType?.includes('application/json')) {
-        return response.json(); // 解析 JSON 回應
-      }
-      return response.text(); // 如果不是 JSON 回應
-    })
-    .then((data) => {
-      console.log('機器人的回應', data.reply || 'No response body');
-
-      // 儲存機器人的回應到 Firebase
-      if (typeof data.reply === 'string') {
-        saveMessageToFirebase(data.reply, "bot");
-      } else if (data && data.text) {
-        saveMessageToFirebase(data.text, "bot");
-      }
-    })
-    .catch((error) => {
-      console.error('Error:', error);
+  try {
+    // 傳送請求到 /chat API
+    const response = await fetch('http://127.0.0.1:5000/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('Content-Type');
+    let data;
+    if (contentType?.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+
+    console.log('機器人的回應', data.reply || 'No response body');
+
+    // 檢查 data.reply 是否存在且是陣列
+    let uniqueNames = [];
+    if (Array.isArray(data.reply) && data.reply.length > 1 && Array.isArray(data.reply[1])) {
+      const allNames = data.reply[1].flatMap(entry => entry.replace("姓名：", "").split("、"));
+      uniqueNames = [...new Set(allNames)];
+    }
+
+    // 儲存機器人回應到 Firebase
+    if (Array.isArray(data.reply) && data.reply.length > 0) {
+      await saveMessageToFirebase(data.reply[0], "bot", uniqueNames.length > 0 ? uniqueNames : null);
+      console.log("成功儲存 bot 訊息", data.reply[0]);
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+  }
 
   text.value = '';
 };
-
-
 
 
 </script>
@@ -80,13 +88,13 @@ const handleClick = () => {
     <el-col :span="20">
       <div class="" >
         <el-row style="display: flex; justify-content: center; align-items: center;">
-          <div class="" style="height: calc(100vh*0.85) ; padding: 30px;">
+          <div class="" style="height: calc(100vh*0.85); padding: 30px; width: 100%;">
             <!-- <h1>hello</h1> -->
             <ChatWindows />
           </div>
         </el-row>
         <el-row style="display: flex; justify-content: center; align-items: center; background-color: #f0f0f0;">
-          <div class="" style="height: calc(100vh*0.1) ; width: 80%; padding: 30px; text-align: center;">
+          <div class="" style="height: calc(100vh*0.1) ; width: 100%; padding-top: 20px; text-align: center;">
           <el-input
             v-model="text"
             style="width: 80%; margin-left: 20px; "

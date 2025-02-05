@@ -44,13 +44,15 @@ def vector_search(user_input: str) -> dict:
         
         # Extract and combine text
         texts = [match["metadata"]["text"] for match in results["matches"]]
-        combined_text = "\n\n".join(texts)
+        respondent = [match["metadata"]["respondent"] for match in results["matches"]]
+        combined_text = " ".join(texts)
+        print(f"Combined text: {combined_text}")
         
-        return {"combined_text": combined_text, "results": results}
+        return {"combined_text": combined_text, "respondent": respondent}
     except Exception as e:
         # Raise a more informative error
         raise RuntimeError(f"Error during vector search: {str(e)}")
 
 
 
-# vector_search("系統分析要注意什麼")
+vector_search("系統分析要注意什麼")

@@ -1,7 +1,7 @@
 <template>
     <div class="chat-windows">
         <!-- 遍歷 -->
-        <ChatBub v-for="chat in chats" :status="chat.role" :key="chat.id" :msg="chat.message" :time="chat.timestamp"/>
+        <ChatBub v-for="chat in chats" :chat="chat" />
 
     </div>
 </template>

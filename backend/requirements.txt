@@ -1,6 +1,7 @@
 Flask
 flask_sockets
 gevent
+groq
 openai
 python-dotenv
 flask-cors
