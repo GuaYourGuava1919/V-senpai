@@ -1,7 +1,9 @@
+import sys
 import torch
 from pinecone import Pinecone, ServerlessSpec
 from transformers import AutoTokenizer, AutoModel
 
+sys.stdout.reconfigure(encoding='utf-8')
 
 pc = Pinecone(api_key="pcsk_VPkZN_FYg8jEj3q9F8MNzqQzBXXGhrtzRPzhY4C8A4W4mPBHCrX8eUQ8QMPTD3FZCtGFe")
 index_name = "quicktest"
@@ -55,4 +57,4 @@ def vector_search(user_input: str) -> dict:
 
 
 
-vector_search("系統分析要注意什麼")
+# vector_search("系統分析要注意什麼")

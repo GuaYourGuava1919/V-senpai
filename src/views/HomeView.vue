@@ -28,53 +28,60 @@ const saveMessageToFirebase = async (message,role,respondent) => {
 };
 
 const handleClick = async () => {
-  console.log('click', text.value);
+  if (text.value) {
+    console.log('click', text.value);
 
-  // 儲存使用者訊息到 Firebase
-  await saveMessageToFirebase(text.value, "user", null);
+    // 儲存使用者訊息到 Firebase
+    await saveMessageToFirebase(text.value, "user", null);
 
-  try {
-    // 傳送請求到 /chat API
-    const response = await fetch('http://127.0.0.1:5000/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
-    });
+    try {
+      // 傳送請求到 /chat API
+      const response = await fetch('http://127.0.0.1:5000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('Content-Type');
+      let data;
+      if (contentType?.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      console.log('機器人的回應', data.reply || 'No response body');
+
+      let uniqueNames = [];
+      if (Array.isArray(data.reply) && data.reply.length > 1 && Array.isArray(data.reply[1])) {
+        const allNames = data.reply[1].flatMap(entry =>
+          entry.replace("姓名：", "").split("、").map(name => 
+            name.replace(/[^\w\u4e00-\u9fa5]/g, '') // 只保留中文、英文、数字
+          )
+        );
+        uniqueNames = [...new Set(allNames)];
+      }
+
+      // 儲存機器人回應到 Firebase
+      if (Array.isArray(data.reply) && data.reply.length > 0) {
+        await saveMessageToFirebase(data.reply[0], "bot", uniqueNames.length > 0 ? uniqueNames : null);
+        console.log("成功儲存 bot 訊息", data.reply[0]);
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
     }
 
-    const contentType = response.headers.get('Content-Type');
-    let data;
-    if (contentType?.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
-
-    console.log('機器人的回應', data.reply || 'No response body');
-
-    // 檢查 data.reply 是否存在且是陣列
-    let uniqueNames = [];
-    if (Array.isArray(data.reply) && data.reply.length > 1 && Array.isArray(data.reply[1])) {
-      const allNames = data.reply[1].flatMap(entry => entry.replace("姓名：", "").split("、"));
-      uniqueNames = [...new Set(allNames)];
-    }
-
-    // 儲存機器人回應到 Firebase
-    if (Array.isArray(data.reply) && data.reply.length > 0) {
-      await saveMessageToFirebase(data.reply[0], "bot", uniqueNames.length > 0 ? uniqueNames : null);
-      console.log("成功儲存 bot 訊息", data.reply[0]);
-    }
-
-  } catch (error) {
-    console.error('Error:', error);
+    text.value = '';
+  }else{
+    console.log('請輸入問題')
   }
-
-  text.value = '';
 };
 
 
@@ -103,6 +110,7 @@ const handleClick = async () => {
             show-word-limit
             type="text"
             @keyup.enter="handleClick"
+            
           />
           <el-button
             style="margin-left: 20px;"
