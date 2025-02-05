@@ -8,6 +8,6 @@ flask-cors
 pinecone
 transformers
 torch
-langchain_commuinity
+langchain
 pypdf
 sentence-transformers
