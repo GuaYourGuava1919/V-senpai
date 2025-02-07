@@ -1,12 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect, render_template
 from flask_sockets import Sockets
 
 from flask_cors import CORS
-from openai_client import get_openai_response
+# from openai_client import get_openai_response
 from groq_client import get_groq_response
 # from pinecone import Pinecone, ServerlessSpec
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='static')
 CORS(app)  # 啟用 CORS
 
 
@@ -15,9 +15,13 @@ CORS(app)  # 啟用 CORS
 
 @app.route('/')
 def hello():
-    return 'Hello World!'
+    return render_template('index.html')
 
-@app.route('/chat', methods=['POST'])
+@app.route('/api/')
+def index():
+    return 'Hello Flask API!'
+
+@app.route('/api/chat', methods=['POST'])
 def chat():
     try:
         # 解析 JSON 請求
@@ -25,8 +29,9 @@ def chat():
         if not user_input:
             return jsonify({"error": "Message cannot be empty"}), 400
         # 呼叫 OpenAI 客戶端並獲取回應
-        # reply = get_groq_response(user_input)
-        reply = get_openai_response(user_input)
+        reply = get_groq_response(user_input)
+        # reply = get_openai_response(user_input)
+        # reply = user_input
         return jsonify({"reply": reply}), 200
 
     except Exception as e:

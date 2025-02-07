@@ -1,19 +1,18 @@
+import os
 import sys
-import torch
-from pinecone import Pinecone, ServerlessSpec
-from transformers import AutoTokenizer, AutoModel
+from pinecone import Pinecone
+from sentence_transformers import SentenceTransformer
 
+# 設定標準輸出編碼為 UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
 
-pc = Pinecone(api_key="pcsk_VPkZN_FYg8jEj3q9F8MNzqQzBXXGhrtzRPzhY4C8A4W4mPBHCrX8eUQ8QMPTD3FZCtGFe")
+# 初始化 Pinecone
+pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 index_name = "quicktest"
 index = pc.Index(index_name)
 
-model_name = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1" #384
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModel.from_pretrained(model_name) 
-
-
+# 載入 SentenceTransformer 模型（已去掉 torch 和 transformers）
+model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
 
 def vector_search(user_input: str) -> dict:
     """
@@ -26,18 +25,13 @@ def vector_search(user_input: str) -> dict:
         dict: 包含組合文本 ('combined_text') 和原始查詢結果 ('results')。
     """
     try:
-        # Tokenize user input
-        query_tokens = tokenizer(
-            user_input, padding=True, truncation=True, return_tensors="pt"
-        )
-        # Generate embedding
-        with torch.no_grad():
-            query_embedding = model(**query_tokens).last_hidden_state.mean(dim=1)
+        # 讓模型直接產生向量
+        query_embedding = model.encode(user_input)
 
-        # Query Pinecone
+        # 修正：去掉 `[0]`，直接轉 list
         results = index.query(
             namespace="ns1",
-            vector=query_embedding[0].tolist(),
+            vector=query_embedding.tolist(),  # 直接轉換成 list
             top_k=3,
             include_values=False,
             include_metadata=True
@@ -52,9 +46,7 @@ def vector_search(user_input: str) -> dict:
         
         return {"combined_text": combined_text, "respondent": respondent}
     except Exception as e:
-        # Raise a more informative error
         raise RuntimeError(f"Error during vector search: {str(e)}")
 
-
-
+# 測試範例
 # vector_search("系統分析要注意什麼")
