@@ -1,14 +1,15 @@
 Flask==3.1.0
 Werkzeug==3.1.3
-flask_sockets
-gevent
+# flask_sockets
+# gevent
 groq
-openai
+# openai
 python-dotenv
 flask-cors
 pinecone
-transformers
-torch
-langchain
-pypdf
-sentence-transformers
+# transformers
+# torch
+# langchain
+# pypdf
+# sentence-transformers
+gunicorn

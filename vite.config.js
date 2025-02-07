@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/static/',
+  base: '/dist/',
   plugins: [
     vue(),
     vueDevTools(),
@@ -20,7 +20,7 @@ export default defineConfig({
     historyApiFallback: true
   },
   build: {
-    outDir: 'backend/static',
+    outDir: 'dist',
   }
 })
 

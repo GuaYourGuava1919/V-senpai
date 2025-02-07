@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify, redirect, render_template
-from flask_sockets import Sockets
+# from flask_sockets import Sockets
 
 from flask_cors import CORS
 # from openai_client import get_openai_response
-from groq_client import get_groq_response
+from backend.groq_client import get_groq_response
 # from pinecone import Pinecone, ServerlessSpec
 
-app = Flask(__name__, template_folder='static')
+app = Flask(__name__, template_folder='dist', static_folder='dist')
 CORS(app)  # 啟用 CORS
 
 
