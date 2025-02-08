@@ -5,7 +5,7 @@ from pinecone import Pinecone
 
 # 初始化 Pinecone
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-index_name = "quicktest"
+index_name = "systemanalyse"
 index = pc.Index(index_name)
 
 co = cohere.ClientV2()
@@ -43,4 +43,4 @@ def vector_search_light(user_input: str) -> dict:
     except Exception as e:
         raise RuntimeError(f"Error during vector search: {str(e)}")
 
-vector_search_light("系統分析要注意什麼")
+# vector_search_light("系統分析要注意什麼")

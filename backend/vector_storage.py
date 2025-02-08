@@ -1,4 +1,5 @@
 import re
+import os
 import time
 import torch
 from pinecone import Pinecone, ServerlessSpec
@@ -8,14 +9,18 @@ from langchain_community.embeddings.sentence_transformer import (
     SentenceTransformerEmbeddings,
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
 
+load_dotenv()
 
-pc = Pinecone(api_key="pcsk_VPkZN_FYg8jEj3q9F8MNzqQzBXXGhrtzRPzhY4C8A4W4mPBHCrX8eUQ8QMPTD3FZCtGFe")
+# PINECONE_API_KEY = "pcsk_2dqAGj_F9GnJ9YXFUdyPRBNZv1MMGMkYxEtxD5BZYqNz5MF6hgMdNF6mEeurFbLSXfc6R9"
+# pc = Pinecone(api_key=PINECONE_API_KEY)
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
 # 設定索引來儲存資料。
 
 # 建立無伺服器索引 (建立一次即可)
-index_name = "quicktest"
+index_name = "systemanalyse" #Pinecone 不允許大寫字母、特殊字符（!、_、空格）。
 
 # pc.create_index(
 #     name=index_name,
@@ -34,7 +39,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name) 
 
 # PDF 文件的路徑
-file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc3.pdf"
+file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc4.pdf"
 
 # 載入 PDF 文件
 loader = PyPDFLoader(file_path)

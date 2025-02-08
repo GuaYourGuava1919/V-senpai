@@ -2,6 +2,8 @@ import os
 from groq import Groq
 # from backend.vector_search import vector_search
 from backend.vector_search_light import vector_search_light
+# from vector_search_light import vector_search_light
+
 
 
 def get_groq_response(user_input: str) -> str:

@@ -8,7 +8,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 # 初始化 Pinecone
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-index_name = "quicktest"
+index_name = "systemanalyse"
 index = pc.Index(index_name)
 
 # 載入 SentenceTransformer 模型（已去掉 torch 和 transformers）
