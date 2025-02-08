@@ -36,7 +36,7 @@ const handleClick = async () => {
 
     try {
       // 傳送請求到 /chat API
-      const response = await fetch('http://127.0.0.1:5000/api/chat', {
+      const response = await fetch('http://127.0.0.1:5000/api/chat_groq&cohere', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

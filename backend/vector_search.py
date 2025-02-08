@@ -1,7 +1,7 @@
 import os
 import sys
 from pinecone import Pinecone
-# from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 
 # 設定標準輸出編碼為 UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
@@ -12,7 +12,7 @@ index_name = "quicktest"
 index = pc.Index(index_name)
 
 # 載入 SentenceTransformer 模型（已去掉 torch 和 transformers）
-# model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
+model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
 
 def vector_search(user_input: str) -> dict:
     """
@@ -26,8 +26,8 @@ def vector_search(user_input: str) -> dict:
     """
     try:
         # 讓模型直接產生向量
-        # query_embedding = model.encode(user_input)
-        query_embedding = [0.1, 0.2, 0.3, 0.4]  # 假設這是查詢向量
+        query_embedding = model.encode(user_input)
+        #query_embedding = [0.1, 0.2, 0.3, 0.4]  # 假設這是查詢向量
 
         # 修正：去掉 `[0]`，直接轉 list
         results = index.query(
