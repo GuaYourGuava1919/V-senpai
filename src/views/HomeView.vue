@@ -19,7 +19,6 @@ const uid = localStorage.getItem('uid')
 
 //讀取Action
 const countStore = useCountStore()
-const { isLoading } = storeToRefs(countStore)
 
 
 const saveMessageToFirebase = async (message,role,respondent) => {

@@ -38,6 +38,7 @@ const uid = localStorage.getItem('uid');
 const countStore = useCountStore()
 const { isLoading } = storeToRefs(countStore)
 
+
 // 🔹 取得聊天紀錄並滾動到底部
 const getChatHistory = () => {
     const q = query(collection(db, `users/${uid}/messages`), orderBy("timestamp"));
@@ -66,28 +67,31 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     border-radius:20px ;
+    border: 2px solid #ccc;
+    padding: 20px;
 }
 
 .chat-windows {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     padding: 20px;
     height: 100%;
     overflow-y: auto;
-    border: 2px solid #ccc;
     border-radius: 20px;
     width: 100%;
-}
 
-.chat-content {
+    .chat-content {
     position: relative;
     min-height: 100px; /* 防止畫面塌陷 */
+    }
+
+    .chat_window_box {
+        display: flex;
+        justify-content: center;
+        align-items: start;
+    }
+    
 }
 
-.chat_window_box {
-    display: flex;
-    justify-content: center;
-    align-items: start;
-}
+
 </style>

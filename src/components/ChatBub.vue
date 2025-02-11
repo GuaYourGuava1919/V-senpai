@@ -3,7 +3,7 @@
     <!-- {{ isLoading }} -->
     <!-- Bot 訊息 -->
     <div class="chat-bub" 
-         v-if="props.chat.role === 'bot' && !(isLoading && isLastMessage)" 
+         v-if="props.chat.role === 'bot'" 
          style="justify-content: flex-start;">
       <div class="bot_content">
         <div class="markdown-content" v-html="parsedMarkdown"></div>
@@ -31,12 +31,10 @@
 
 
 <script setup>
-import { ref, watch, onMounted, defineEmits } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
-// import { storeToRefs } from "pinia";
-// import { useCountStore } from '@/stores/counter';
 
 
 const props = defineProps({
