@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from vector_search import vector_search
+from backend.vector_search import vector_search
 
 load_dotenv()
 token = os.environ.get("GITHUB_TOKEN")

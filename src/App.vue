@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div class="lxgw-wenkai-tc">
     <RouterView />
   </div>
 </template>
 
-<script>
+<script>  
+
 import { RouterLink, RouterView } from 'vue-router'
 
 export default {
@@ -14,6 +15,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import "@/assets/fonts.css";
+
 :root {
   --el-color-primary: #6C63FF;  /* 主色 */
   --el-color-warning: #FFA726;  /* 副色 */

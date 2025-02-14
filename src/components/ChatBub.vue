@@ -85,7 +85,7 @@ watch(() => props.chat.message, (newMessage) => {
     max-width: 55%;
     overflow-x: auto;
     .markdown-content {
-        font-family: Arial, sans-serif;
+        font-family: "LXGW WenKai TC", serif !important;
         line-height: 2;
         color: #333;
         hr {

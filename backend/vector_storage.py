@@ -42,23 +42,55 @@ index_name_2 = "remote-systemanalyse"
 # model = AutoModel.from_pretrained(model_name) 
 
 # PDF 文件的路徑
-file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc1.pdf"
+file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc6.pdf"
 
 # 載入 PDF 文件
 loader = PyPDFLoader(file_path)
 document = loader.load()
 
-respondents = []  # 儲存與受訪者相關的內容
+import re
+
+respondents = []
 
 for page in document:
     text_content = page.page_content
-    print(f"Page content: {text_content}") # 打印頁面內容
-    
-    respondent_pattern = re.compile(r"受訪者\s*[:：]?\s*(\S+)")  # \S+ 用來匹配非空白字符
-    matches = respondent_pattern.findall(text_content) # 使用正則表達式尋找受訪者名稱
-    
+    # print(f"Page content: {text_content}")  # Debug: 打印頁面內容
+
+    # 1️⃣ **抓取「受訪者」或「受訪者姓名」後的內容**
+    respondent_pattern = re.compile(r"受訪者(?:姓名)?\s*[:：]?\s*([\u4e00-\u9fff、，, ]+)")
+
+    # 2️⃣ **刪除括號內容（如 "(大三)"）和學長姐稱謂**
+    cleanup_pattern = re.compile(r"[\(\（].*?[\)\）]|學[長姐弟妹]?")
+
+    # 3️⃣ **改進刪除系級資訊的正則**
+    # - `(?:資管|電子|機械|經濟|資訊|電機|土木|生科|應數|統計|外文|企管|國貿|財金|法律|醫學|護理|建築|社工|新聞|藝術)?`
+    #   ➝ 避免匹配太多，確保只是學系名稱（可以根據實際情況補充更多學系名稱）
+    # - `[\d一二三四五六七八九]?[甲乙丙丁年級班]*`
+    #   ➝ 限制刪除的內容長度，避免刪掉姓氏
+    department_pattern = re.compile(r"^(?:資管|電子|機械|經濟|資訊|電機|土木|生科|應數|統計|外文|企管|國貿|財金|法律|醫學|護理|建築|社工|新聞|藝術)?[\d一二三四五六七八九]?[甲乙丙丁年級班]?")
+
+    matches = respondent_pattern.findall(text_content)  # 先匹配可能的姓名片段
+    # print(f"Matches found: {matches}")  # Debug: 確認是否成功匹配
+
     for match in matches:
-        respondents.append(match)  # 將找到的名字加入 respondents 列表
+        # print(f"Original matched text: {match}")  # Debug: 看看匹配的原始內容
+
+        # 4️⃣ **切割多個名字**
+        possible_names = re.split(r"[、，,]", match)
+        # print(f"Split names: {possible_names}")  # Debug: 確保正確切割多個名字
+
+        for name in possible_names:
+            name = name.strip()
+            name_no_dept = department_pattern.sub("", name, count=1)  # **刪除系級資訊（只刪除開頭的第一個匹配）**
+            clean_name = cleanup_pattern.sub("", name_no_dept)  # **刪除括號與稱謂**
+            
+            # print(f"Processed name: {clean_name}")  # Debug: 檢查清理後的名字
+
+            if 3 <= len(clean_name) <= 4:  # **確保名字長度為 3 或 4**
+                respondents.append(clean_name)
+
+# print("Extracted Respondents:", respondents)
+
 
 # 使用文本分割器處理文檔
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=80)
@@ -146,18 +178,18 @@ for document, embedding in zip(chunked_documents, vectors):
 
 
 # # 打印結果確認
-print(vectors)
+# print(vectors)
 
 # # Wait for the index to be ready
-while not pc.describe_index(index_name_2).status['ready']:
-    time.sleep(1)
+# while not pc.describe_index(index_name_2).status['ready']:
+#     time.sleep(1)
 
-index = pc.Index(index_name_2)
+# index = pc.Index(index_name_2)
 
-index.upsert(
-    vectors=vector_list,
-    namespace="ns1"
-)
+# index.upsert(
+#     vectors=vector_list,
+#     namespace="ns1"
+# )
 
 # # 使用 describe_index_stats 操作檢查目前的向量數目是否與您倒插的向量數目相符。
-print(index.describe_index_stats())
+# print(index.describe_index_stats())
