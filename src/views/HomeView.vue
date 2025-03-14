@@ -1,89 +1,97 @@
 <script setup>
-
+// components
 import Navbar from '../components/Navbar.vue'
 import ChatWindows from '../components/ChatWindows.vue'
-import { db } from '../config/firebase'
-import { collection ,addDoc } from 'firebase/firestore'
 
+// firebase
+import { db } from '../config/firebase';
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-import { storeToRefs } from "pinia";
+// pinia
 import { useCountStore } from '@/stores/counter';
 
 
-//輸入框
+//element-plus
 import { onMounted, ref } from 'vue'
 import { ElButton, ElInput, roleTypes } from 'element-plus'
-const text = ref('')
-
-const uid = localStorage.getItem('uid')
-
-//讀取Action
-const countStore = useCountStore()
 
 
-const saveMessageToFirebase = async (message,role,respondent) => {
+const text = ref('') // 輸入框的值
+const uid = localStorage.getItem('uid') // 使用者 ID
+const countStore = useCountStore() //讀取Action
+
+
+const saveMessageToFirebase = async (uid, message, sender, conversationId = null, respondents = []) => {
   try {
-       //儲存路徑/users/{uid}/messages/
-      const docRef = await addDoc(collection(db, `users/${uid}/messages`), {
-        message,
+    if (!uid) {
+      throw new Error("未提供 UID，無法儲存對話");
+    }
+
+    if (sender === "user") {
+      // ✅ 建立新的對話記錄 (使用 collection)
+      const collectionRef = collection(db, `users/${uid}/conversations/chat01/messages`);
+      // 👇 必須存下 addDoc 回傳值 (文件參考)
+      const docRef = await addDoc(collectionRef, {
+        question: message,
+        response: "",
+        respondents: [],
         timestamp: new Date(),
-        role: role,
-        respondent,
       });
-    console.log('Document written with ID:', docRef.id);
+
+      console.log(`成功儲存使用者問題: ${message}`);
+
+      // 這裡才有 id 可以回傳!
+      return docRef.id;
+
+    } 
+    else if (sender === "bot" && conversationId) {
+      // ✅ 更新指定文件 (使用 doc)
+      const docRef = doc(db, `users/${uid}/conversations/chat01/messages/${conversationId}`);
+      await updateDoc(docRef, {
+        response: message,
+        respondents: respondents,
+      });
+      console.log(`更新 conversation: ${conversationId}，添加機器人回應與 respondents: ${respondents}`);
+    } else {
+      throw new Error("機器人回應缺少 conversationId，無法更新資料");
+    }
   } catch (error) {
-    console.error('Error adding document:', error);
+    console.error("儲存訊息時發生錯誤:", error);
   }
 };
 
+
+
 const handleClick = async () => {
   if (text.value) {
-
     countStore.setLoading(true);
-
-    console.log('click', text.value);
-
-    await saveMessageToFirebase(text.value, "user", null);
-
     try {
+      // 1. 先儲存使用者問題，並取得 conversationId
+      const conversationId = await saveMessageToFirebase(uid, text.value, "user", null, []);
 
-      const response = await fetch('/api/chat', {
-      // const response = await fetch('http://127.0.0.1:5000/api/chat', {
+      // 2. 發送請求到 Flask API
+      const response = await fetch('http://127.0.0.1:5000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: text.value }), // 使用 JSON.stringify 格式化資料
+        body: JSON.stringify({ message: text.value }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const contentType = response.headers.get('Content-Type');
-      let data;
-      if (contentType?.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
+      const data = await response.json(); // 將回應轉換為 JSON 格式
 
       console.log('機器人的回應', data.reply || 'No response body');
 
-      let uniqueNames = [];
-      if (Array.isArray(data.reply) && data.reply.length > 1 && Array.isArray(data.reply[1])) {
-        const allNames = data.reply[1].flatMap(entry =>
-          entry.replace("姓名：", "").split("、").map(name => 
-            name.replace(/[^\w\u4e00-\u9fa5]/g, '') // 只保留中文、英文、数字
-          )
-        );
-        uniqueNames = [...new Set(allNames)];
+      //檢查data.reply[1]中的值是否重複
+      let filtedRespondents = [];
+      if (Array.isArray(data.reply[1]) && data.reply[1].length > 0) {
+        filtedRespondents = data.reply[1].filter((item, index) => data.reply[1].indexOf(item) === index);
       }
 
-      // 儲存機器人回應到 Firebase
+      // 3. 儲存機器人回應到 Firebase，使用相同 conversationId
       if (Array.isArray(data.reply) && data.reply.length > 0) {
-        await saveMessageToFirebase(data.reply[0], "bot", uniqueNames.length > 0 ? uniqueNames : null);
-        console.log("成功儲存 bot 訊息", data.reply[0]);
+        await saveMessageToFirebase(uid, data.reply[0], "bot", conversationId, filtedRespondents);
+        console.log("成功儲存機器人的回應", data.reply[0]);
       }
 
     } catch (error) {
@@ -92,9 +100,8 @@ const handleClick = async () => {
 
     text.value = '';
     countStore.setLoading(false);
-    
-  }else{
-    console.log('請輸入問題')
+  } else {
+    console.log('請輸入問題');
   }
 };
 

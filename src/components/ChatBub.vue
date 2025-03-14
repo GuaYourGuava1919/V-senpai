@@ -1,30 +1,29 @@
 <template>
   <div>
     <!-- {{ isLoading }} -->
+    <!-- 使用者訊息 -->
+    <div class="chat-bub" v-if="props.chat.question" style="justify-content: flex-end;">
+      <div class="time">{{ formattedTime }}</div>
+      <div class="user_content">
+        <p>{{ chat.question }}</p>
+      </div>
+    </div>
     <!-- Bot 訊息 -->
     <div class="chat-bub" 
-         v-if="props.chat.role === 'bot'" 
+         v-if="props.chat.response" 
          style="justify-content: flex-start;">
       <div class="bot_content">
         <div class="markdown-content" v-html="parsedMarkdown"></div>
         <el-divider />
         <div class="respondent-list">
           內容來自於學長姐：
-          <span v-if="chat.respondent && chat.respondent.length > 0">
-            {{ chat.respondent.join(', ') }}
+          <span v-if="chat.respondents && chat.respondents.length > 0">
+            {{ chat.respondents.join(', ') }}
           </span>
           <span v-else>未知</span>
         </div>
       </div>
       <div class="time">{{ formattedTime }}</div>
-    </div>
-
-    <!-- 使用者訊息 -->
-    <div class="chat-bub" v-if="props.chat.role === 'user'" style="justify-content: flex-end;">
-      <div class="time">{{ formattedTime }}</div>
-      <div class="user_content">
-        <p>{{ chat.message }}</p>
-      </div>
     </div>
   </div>
 </template>
@@ -54,21 +53,18 @@ const timestampToTime = (timestamp) => {
 
 onMounted(() => {
   formattedTime.value = timestampToTime(props.chat.timestamp);
-  parsedMarkdown.value = props.chat.message 
-    ? DOMPurify.sanitize(marked(props.chat.message)) 
+  parsedMarkdown.value = props.chat.response
+    ? DOMPurify.sanitize(marked(props.chat.response)) 
     : '';
 });
 
-watch(() => props.chat.message, (newMessage) => {
-  parsedMarkdown.value = newMessage 
-    ? DOMPurify.sanitize(marked(newMessage)) 
+watch(() => props.chat.response, (newResponse) => {
+  parsedMarkdown.value = newResponse 
+    ? DOMPurify.sanitize(marked(newResponse)) 
     : '';
 });
-
 
 </script>
-
-
 
 <style lang="scss">
 

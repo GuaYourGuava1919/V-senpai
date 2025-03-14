@@ -21,44 +21,57 @@
 </template>
 
 
-
 <script setup>
+//components
 import ChatBub from './ChatBub.vue';
+//firebase
 import { db } from '../config/firebase';
-import { onMounted, ref, nextTick } from 'vue';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-
+//pinia
 import { storeToRefs } from "pinia";
 import { useCountStore } from '@/stores/counter';
+import { ref, onMounted, nextTick, onUnmounted } from 'vue';
 
 const chats = ref([]);
-const chatWindowRef = ref(null); // 🔹 用來綁定 chat 視窗
+const chatWindowRef = ref(null);
 const uid = localStorage.getItem('uid');
 
-const countStore = useCountStore()
-const { isLoading } = storeToRefs(countStore)
+const countStore = useCountStore();
+const { isLoading } = storeToRefs(countStore);
 
+let unsubscribe; // 儲存解除監聽函式
 
-// 🔹 取得聊天紀錄並滾動到底部
-const getChatHistory = () => {
-    const q = query(collection(db, `users/${uid}/messages`), orderBy("timestamp"));
-    onSnapshot(q, (snapshot) => {
-        chats.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // 🔹 等待 DOM 更新後滾動到底部
-        nextTick(() => {
-            if (chatWindowRef.value) {
-                chatWindowRef.value.scrollTop = chatWindowRef.value.scrollHeight;
-            }
-        });
+const scrollToBottom = () => {
+    nextTick(() => {
+        if (chatWindowRef.value) {
+            chatWindowRef.value.scrollTo({
+                top: chatWindowRef.value.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
     });
 };
 
-// 🔹 在掛載時取得聊天記錄
-onMounted(() => {
-    getChatHistory();
+const getChatHistory = () => {
+    if (!uid) {
+        console.warn('尚未登入，無法取得聊天紀錄');
+        return;
+    }
+
+    const q = query(collection(db, `users/${uid}/conversations/chat01/messages`), orderBy("timestamp"));
+    unsubscribe = onSnapshot(q, (snapshot) => {
+        chats.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        scrollToBottom();
+    });
+};
+
+onMounted(getChatHistory);
+
+onUnmounted(() => {
+    if (unsubscribe) unsubscribe();
 });
 </script>
+
 
 
 <style lang="scss" scoped>
@@ -77,6 +90,10 @@ onMounted(() => {
     padding: 20px;
     height: 100%;
     overflow-y: auto;
+    //隱藏滾動條
+    &::-webkit-scrollbar {
+        display: none;
+    }
     border-radius: 20px;
     width: 100%;
 
@@ -94,4 +111,4 @@ onMounted(() => {
 }
 
 
-</style>
+</style>    

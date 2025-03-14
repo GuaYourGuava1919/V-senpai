@@ -8,7 +8,7 @@
     "build": "vite build",
     "vercel-build": "vite build",
     "preview": "vite preview",
-    "start": "concurrently \"vite\" \".venv\\Scripts\\python app.py\"",
+    "start": "concurrently \"vite\" \".venv\\Scripts\\python backend\\app.py\"",
     "deploy": "vite build"
   },
   "dependencies": {
