@@ -4,7 +4,12 @@ from flask import Flask, request, jsonify, redirect, render_template
 from dotenv import load_dotenv
 load_dotenv()
 
-from backend.llm_client import get_groq_response
+# deploy開
+# from backend.llm_client import get_groq_response
+
+#local開
+from llm_client import get_groq_response
+
 
 
 app = Flask(__name__, template_folder='dist', static_folder='dist')

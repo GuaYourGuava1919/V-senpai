@@ -14,3 +14,4 @@ pinecone
 # pypdf
 # sentence-transformers
 # gunicorn
+pdf2image

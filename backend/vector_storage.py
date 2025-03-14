@@ -1,195 +1,147 @@
 import re
 import os
-import time
 
 import cohere
-
-import torch
-import numpy as np
-from transformers import AutoTokenizer, AutoModel
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.embeddings.sentence_transformer import (
-    SentenceTransformerEmbeddings,
-)
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from pinecone import Pinecone, ServerlessSpec
 
-co = cohere.ClientV2()
+import numpy as np
+from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader
 
+# **加載環境變數**
+load_dotenv()
+co = cohere.Client(os.getenv("CO_API_KEY"))
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
+index_name= "chunking-test-dotproduct"
 
-index_name = "systemanalyse" #Pinecone 不允許大寫字母、特殊字符（!、_、空格）。
-index_name_2 = "remote-systemanalyse"
+# **檢查索引是否存在**
+# if index_name_3 not in pc.list_indexes():
+#     print(f"索引 {index_name_3} 不存在，請先建立索引！")
+#     exit(1)
 
 # 建立無伺服器索引 (建立一次即可)
 # pc.create_index(
-#     name=index_name_2,
+#     name=index_name,
 #     dimension=384, 
-#     metric="cosine", 
+#     metric="dotproduct", 
 #     spec=ServerlessSpec(
 #         cloud="aws",
 #         region="us-east-1"
 #     ) 
 # )
 
-
-
-# 選擇本地嵌入模型
-# model_name = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1" #384
-# tokenizer = AutoTokenizer.from_pretrained(model_name) 
-# model = AutoModel.from_pretrained(model_name) 
-
-# PDF 文件的路徑
-file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc6.pdf"
-
-# 載入 PDF 文件
+# **讀取 PDF**
+file_path = "C:/Users/Nicole/Desktop/vue-project/files/doc1.pdf"
 loader = PyPDFLoader(file_path)
 document = loader.load()
 
-import re
+full_text = "\n".join([page.page_content for page in document])
+print(full_text)
 
-respondents = []
+# **正則表達式**
+question_pattern = r"(?:\d+[\.\s]*)?(?:[（\(]\d+[）\)]\s*)?([\u4e00-\u9fa5\s,]{2,100}？(?:\s*[\u4e00-\u9fa5\s,]{2,100}？)*)"
 
-for page in document:
-    text_content = page.page_content
-    # print(f"Page content: {text_content}")  # Debug: 打印頁面內容
-
-    # 1️⃣ **抓取「受訪者」或「受訪者姓名」後的內容**
-    respondent_pattern = re.compile(r"受訪者(?:姓名)?\s*[:：]?\s*([\u4e00-\u9fff、，, ]+)")
-
-    # 2️⃣ **刪除括號內容（如 "(大三)"）和學長姐稱謂**
-    cleanup_pattern = re.compile(r"[\(\（].*?[\)\）]|學[長姐弟妹]?")
-
-    # 3️⃣ **改進刪除系級資訊的正則**
-    # - `(?:資管|電子|機械|經濟|資訊|電機|土木|生科|應數|統計|外文|企管|國貿|財金|法律|醫學|護理|建築|社工|新聞|藝術)?`
-    #   ➝ 避免匹配太多，確保只是學系名稱（可以根據實際情況補充更多學系名稱）
-    # - `[\d一二三四五六七八九]?[甲乙丙丁年級班]*`
-    #   ➝ 限制刪除的內容長度，避免刪掉姓氏
-    department_pattern = re.compile(r"^(?:資管|電子|機械|經濟|資訊|電機|土木|生科|應數|統計|外文|企管|國貿|財金|法律|醫學|護理|建築|社工|新聞|藝術)?[\d一二三四五六七八九]?[甲乙丙丁年級班]?")
-
-    matches = respondent_pattern.findall(text_content)  # 先匹配可能的姓名片段
-    # print(f"Matches found: {matches}")  # Debug: 確認是否成功匹配
-
-    for match in matches:
-        # print(f"Original matched text: {match}")  # Debug: 看看匹配的原始內容
-
-        # 4️⃣ **切割多個名字**
-        possible_names = re.split(r"[、，,]", match)
-        # print(f"Split names: {possible_names}")  # Debug: 確保正確切割多個名字
-
-        for name in possible_names:
-            name = name.strip()
-            name_no_dept = department_pattern.sub("", name, count=1)  # **刪除系級資訊（只刪除開頭的第一個匹配）**
-            clean_name = cleanup_pattern.sub("", name_no_dept)  # **刪除括號與稱謂**
-            
-            # print(f"Processed name: {clean_name}")  # Debug: 檢查清理後的名字
-
-            if 3 <= len(clean_name) <= 4:  # **確保名字長度為 3 或 4**
-                respondents.append(clean_name)
-
-# print("Extracted Respondents:", respondents)
+respondent_pattern = r"(?:受訪者姓名|學長姐訪談受訪者姓名|受訪者)\s*[:：]?\s*([\u4e00-\u9fa5、，, ]+)"
 
 
-# 使用文本分割器處理文檔
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=80)
-chunked_documents = text_splitter.split_documents(document)
+# **分割文本**
+raw_chunks = re.split(f"({question_pattern}|{respondent_pattern})", full_text)
+raw_chunks = [chunk.strip() for chunk in raw_chunks if isinstance(chunk, str) and chunk.strip()]
 
-for i, chunk in enumerate(chunked_documents):
-    chunk.metadata['id'] = i+1
-    if respondents:  # 確保 respondents 不為空
-        chunk.metadata['respondent'] = respondents[i % len(respondents)]
+
+
+chunked_documents = []
+current_question = None
+current_respondent = "未知"
+
+for chunk in raw_chunks:
+    # **如果是受訪者，更新 `current_respondent`**
+    respondent_match = re.search(respondent_pattern, chunk)
+    if respondent_match:
+        current_respondent = respondent_match.group(1).strip()
+        current_respondent = re.sub(r"[（）\(\)【】\[\]]", "", current_respondent)
+        current_respondent = current_respondent.replace("、", ", ")  
+        print(f"✅ 找到受訪者: {current_respondent}")  # Debug
+        continue  
+
+    # **如果是問題，更新 `current_question`**
+    if re.match(question_pattern, chunk):
+        current_question = chunk
     else:
-        chunk.metadata['respondent'] = "未知"  # 如果沒有找到受訪者，設為未知
-
-print(f"Chunked documents: {chunked_documents}")
-print(f"Respondents: {respondents}")
-
-
-# texts = ['第一段文本', '第二段文本', '第三段文本']
-texts = [d.page_content for d in chunked_documents]
-# tokens = pt['input_ids', 'attention_mask']
-# tokens = tokenizer(
-#     texts,                 # 輸入文本的列表，例如 ["第一段文本", "第二段文本"]
-#     padding=True,          # 啟用填充，確保所有序列長度一致
-#     truncation=True,       # 啟用截斷，過長的序列會被截斷到模型的最大長度
-#     return_tensors="pt"    # 返回 PyTorch 張量，適用於 PyTorch 模型
-# )
+        if current_question:
+            formatted_response = f"{current_respondent} 說：{chunk}"
+            chunked_documents.append({
+                "question": current_question,
+                "response": formatted_response,
+                "respondent": current_respondent
+            })
+            print(f"✅ 儲存問答組合: {current_question} -> 受訪者: {current_respondent}")  # Debug
+            current_question = None  
 
 
-response = co.embed(
-    texts= texts,
-    model="embed-multilingual-light-v3.0",
-    input_type="search_document",
-    embedding_types=["float"],
-)
+if not chunked_documents:
+    print("❌ chunked_documents 是空的，請檢查正則表達式是否正確匹配問題！")
+else:
+    print("=== 最終切割結果 ===")
+    for doc in chunked_documents[:5]:  # 顯示前 5 個
+        print(f"問題: {doc['question']}")
+        print(f"回應: {doc['response']}")
+        print(f"受訪者: {doc['respondent']}")
+        print("-" * 50)
 
 
-# # # 生成嵌入
-# with torch.no_grad():
-#     embeddings = model(**tokens).last_hidden_state.mean(dim=1)
-#     print(embeddings[0])  # 打印第一個嵌入向量
+# **解析問題 + 回應**
+# chunked_documents = []
+# current_question = None
+# current_respondent = ""
 
-
-
-vectors = response.embeddings.float  # 這裡的 vectors 可能是 NumPy array 或 PyTorch tensor
-vector_list = []  # 用來存放 Pinecone 的向量數據
-
-for document, embedding in zip(chunked_documents, vectors):
-    doc_id = document.metadata.get('id')
-    text = document.page_content
-    respondent = document.metadata.get('respondent', '未知')
-
-    # 確保 embedding 是 NumPy 陣列，並轉換為 float32
-    embedding = np.array(embedding, dtype=np.float32)
-
-    if doc_id is not None:
-        vector_list.append({  # 使用 vector_list，而不是修改原本的 vectors
-            "id": "Vec" + str(doc_id),
-            "values": embedding.tolist(),
-            "metadata": {
-                'text': text,
-                'respondent': respondent
-            }
-        })
-    else:
-        print(f"Warning: Missing 'id' in the document: {document}")
-
-
-# for d, e in zip(chunked_documents, embeddings):
-#     # 使用 get 方法來避免 KeyError
-#     doc_id = d.metadata.get('id')
-#     text = d.page_content
-#     respondent = d.metadata.get('respondent', '未知')
-#     # 確保 'id' 存在
-#     if doc_id is not None:
-#         vectors.append({
-#             "id": "Vec"+str(doc_id),  # 將 ID 轉為字串
-#             "values": e.tolist(),  # 將嵌入的張量轉為 Python 列表
-#             "metadata": {
-#                 'text': text,
-#                 'respondent': respondent
-#             }
-#         })
+# for chunk in interview_chunks:
+#     if re.match(question_pattern, chunk):  
+#         current_question = chunk
+#         current_respondent = "未知"
 #     else:
-#         print(f"Warning: Missing 'id' in the document: {d}")
+#         if current_question:
+#             respondent_match = re.search(respondent_pattern, chunk)
+#             if respondent_match:
+#                 current_respondent = respondent_match.group(1)  
+
+#             chunked_documents.append({
+#                 "question": current_question,
+#                 "response": chunk,
+#                 "respondent": current_respondent
+#             })
+#             current_question = None
+
+# **嵌入向量**
+# vector_list = []
+# for idx, chunk in enumerate(chunked_documents):
+#     text_to_embed = f"問題: {chunk['question']}\n回應: {chunk['response']}"
+#     response = co.embed(texts=[text_to_embed], model="embed-multilingual-light-v3.0", input_type="search_document", embedding_types=["float"])
+
+#     if hasattr(response.embeddings, "float"):
+#         vectors = np.array(response.embeddings.float, dtype=np.float32)
+#     elif isinstance(response.embeddings, list):
+#         vectors = np.array(response.embeddings, dtype=np.float32)
+#     else:
+#         raise TypeError(f"Unexpected response.embeddings type: {type(response.embeddings)}")
 
 
+#     vector_list.append({
+#     "id": f"Vec{idx}",
+#     "values": vectors.flatten().tolist(),  # ✅ 確保是 List[float]
+#     "metadata": {
+#         "question": chunk["question"],
+#         "response": chunk["response"],
+#         "respondent": chunk["respondent"]
+#         }
+#     })
+    
 
-# # 打印結果確認
-# print(vectors)
 
-# # Wait for the index to be ready
-# while not pc.describe_index(index_name_2).status['ready']:
-#     time.sleep(1)
+# **上傳至 Pinecone**
+# index = pc.Index(index_name)
+# index.upsert(vectors=vector_list, namespace="ns1")
 
-# index = pc.Index(index_name_2)
+# print(f"成功上傳 {len(vector_list)} 條向量到 Pinecone！")
 
-# index.upsert(
-#     vectors=vector_list,
-#     namespace="ns1"
-# )
-
-# # 使用 describe_index_stats 操作檢查目前的向量數目是否與您倒插的向量數目相符。
-# print(index.describe_index_stats())
