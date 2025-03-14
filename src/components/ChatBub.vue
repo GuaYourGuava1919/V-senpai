@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="chat-bub-container">
     <!-- {{ isLoading }} -->
     <!-- 使用者訊息 -->
     <div class="chat-bub" v-if="props.chat.question" style="justify-content: flex-end; align-items: end;">
@@ -26,11 +26,28 @@
             </span>
             <span v-else>未知</span>
           </div>
+          <div class="scores-list">
+            分數：
+            <span>{{ chat.scores }}</span>
+          </div>
         </div>
-        <div class="time">{{ formattedTime }}</div>
+        <div class="time">
+          <button class="dialog-btn" @click="dialogVisible = true">
+            原文
+          </button>
+          {{ formattedTime }}
+        </div>
+        <el-dialog
+          v-model="dialogVisible"
+          title="原文"
+          width="500"
+        >
+          <span>{{chat.originalText}}</span>
+        </el-dialog>
       </div>
     </div>
   </div>
+  
 </template>
 
 
@@ -48,6 +65,7 @@ const props = defineProps({
 
 const formattedTime = ref('');
 const parsedMarkdown = ref('');
+const dialogVisible = ref(false);
 
 
 const timestampToTime = (timestamp) => {
@@ -72,11 +90,15 @@ watch(() => props.chat.response, (newResponse) => {
 </script>
 
 <style lang="scss">
-
+.chat-bub-container{
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+  gap: 10px;
 .chat-bub {
   display: flex;
   margin-top: 10px;
-  // align-items: start;
   
   .chat-bub-avatar {
     display: flex;
@@ -93,7 +115,7 @@ watch(() => props.chat.response, (newResponse) => {
     color: #444545;
     padding: 40px;
     border-radius: 30px;
-    max-width: 55%;
+    width: 500px;
     overflow-x: auto;
     .markdown-content {
         font-family: "LXGW WenKai TC", serif !important;
@@ -115,6 +137,15 @@ watch(() => props.chat.response, (newResponse) => {
         color: #FFA725;
       }
     }
+    .scores-list{
+      margin-top: 20px;
+      font-size: 18px;
+      color: #AA60C8;
+      font-weight: 600;
+      span{
+        color: #D84040;
+      }
+    }
     .el-divider--horizontal{
       border-top: 1px solid #AA60C8;
     }
@@ -133,6 +164,16 @@ watch(() => props.chat.response, (newResponse) => {
     font-size: 12px;
     color: #999;
   }
- 
+  
+  .dialog-btn {
+    background-color: #AA60C8;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  }
 }
 </style>

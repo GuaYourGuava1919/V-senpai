@@ -4,7 +4,6 @@ import cohere
 import sys
 from pinecone import Pinecone
 from dotenv import load_dotenv
-# from sentence_transformers import SentenceTransformer
 
 # 設定標準輸出編碼為 UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
@@ -76,13 +75,14 @@ def vector_search_light(user_input: str) -> dict:
         print(f"查詢結果: {results}")
 
         # 修正處：安全地存取 metadata
+        title = [match["metadata"].get("title", "Undefined") for match in results["matches"]]
         texts = [match["metadata"].get("text", "") for match in results["matches"]]
         respondents = [match["metadata"].get("respondents", "") for match in results["matches"]]
         scores = [match.get("score", 0) for match in results["matches"]]
 
         combined_text = " ".join(texts)
 
-        return {"combined_text": combined_text, "respondents": respondents, "score": scores}
+        return {"combined_text": combined_text, "respondents": respondents, "score": scores, "titles": title}
 
     except Exception as e:
         raise RuntimeError(f"Error during vector search: {str(e)}")

@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # deploy開
-# from backend.llm_client import get_groq_response
+from backend.llm_client import get_groq_response
 
 #local開
-from llm_client import get_groq_response
+# from llm_client import get_groq_response
 
 
 

@@ -21,7 +21,7 @@ const uid = localStorage.getItem('uid') // 使用者 ID
 const countStore = useCountStore() //讀取Action
 
 
-const saveMessageToFirebase = async (uid, message, sender, conversationId = null, respondents = []) => {
+const saveMessageToFirebase = async (uid, message, sender, conversationId = null, respondents = [], originalText, scores,) => {
   try {
     if (!uid) {
       throw new Error("未提供 UID，無法儲存對話");
@@ -36,6 +36,8 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
         response: "",
         respondents: [],
         timestamp: new Date(),
+        originalText:'',
+        scores: 0,
       });
 
       console.log(`成功儲存使用者問題: ${message}`);
@@ -50,6 +52,8 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
       await updateDoc(docRef, {
         response: message,
         respondents: respondents,
+        originalText:originalText,
+        scores: scores,
       });
       console.log(`更新 conversation: ${conversationId}，添加機器人回應與 respondents: ${respondents}`);
     } else {
@@ -60,6 +64,10 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
   }
 };
 
+const average = (numbers) => {
+      return numbers.reduce((acc, num) => acc + num, 0) / numbers.length;
+}
+
 
 
 const handleClick = async () => {
@@ -67,7 +75,7 @@ const handleClick = async () => {
     countStore.setLoading(true);
     try {
       // 1. 先儲存使用者問題，並取得 conversationId
-      const conversationId = await saveMessageToFirebase(uid, text.value, "user", null, []);
+      const conversationId = await saveMessageToFirebase(uid, text.value, "user", null, [], "", 0);
 
       // 2. 發送請求到 Flask API
       const response = await fetch('http://127.0.0.1:5000/api/chat', {
@@ -88,9 +96,11 @@ const handleClick = async () => {
         filtedRespondents = data.reply[1].filter((item, index) => data.reply[1].indexOf(item) === index);
       }
 
+      console.log('平均值', average(data.reply[2]));
+
       // 3. 儲存機器人回應到 Firebase，使用相同 conversationId
       if (Array.isArray(data.reply) && data.reply.length > 0) {
-        await saveMessageToFirebase(uid, data.reply[0], "bot", conversationId, filtedRespondents);
+        await saveMessageToFirebase(uid, data.reply[0], "bot", conversationId, filtedRespondents, data.reply[3], average(data.reply[2]));
         console.log("成功儲存機器人的回應", data.reply[0]);
       }
 

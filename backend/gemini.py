@@ -16,7 +16,7 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 co = cohere.Client(COHERE_API_KEY)
 
 # ====== PDF 轉圖片部分 (範例) ======
-pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc3.pdf"
+pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc1.pdf"
 poppler_path = r"C:\\Users\\Nicole\\Downloads\\Release-24.08.0-0\\poppler-24.08.0\\Library\\bin"
 pages = convert_from_path(pdf_file, poppler_path=poppler_path)
 print(f"Converted {len(pages)} PDF pages to images.")
@@ -44,17 +44,17 @@ print("Gemini model loaded:", model)
 #   <chunk_text>必需有</chunk_text>
 # </chunk>
 CHUNKING_PROMPT = """\
-OCR the following page into Markdown. Tables should be formatted as HTML.
-Do not surround your output with triple backticks.
-Chunk the document into sections of roughly 250 - 1000 words.
+將以下頁面進行 OCR 文字辨識，並轉換為 Markdown 格式。其中的表格部分請使用 HTML 格式呈現。
 
-For each chunk, output the following format:
+OCR 完成後，請將文件內容清楚地拆分成問答組合，並忽略任何與個人心得、回饋或經驗分享相關的內容（例如：「心得分享」或類似標題的部分）。
+
+每個問答組合請以簡明易懂的方式總結，以以下格式呈現：
 <chunk>
-<chunk_title>... (optional) ...</chunk_title>
-<chunk_text>... (required) ...</chunk_text>
+    <chunk_title>... (optional) ...</chunk_title>
+    <chunk_text>... (required) ...</chunk_text>
 </chunk>
 
-Preserve as much content as possible, including headings, tables, etc.
+保留所有有意義的內容，僅排除與個人心得分享有關的部分。
 """
 
 def process_page(page_num, image_b64):
