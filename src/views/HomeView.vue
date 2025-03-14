@@ -78,7 +78,9 @@ const handleClick = async () => {
       const conversationId = await saveMessageToFirebase(uid, text.value, "user", null, [], "", 0);
 
       // 2. 發送請求到 Flask API
-      const response = await fetch('http://127.0.0.1:5000/api/chat', {
+      const response = await fetch('/api/chat', {
+
+      // const response = await fetch('http://127.0.0.1:5000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
