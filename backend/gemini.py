@@ -16,7 +16,7 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 co = cohere.Client(COHERE_API_KEY)
 
 # ====== PDF 轉圖片部分 (範例) ======
-pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc1.pdf"
+pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc6.pdf"
 poppler_path = r"C:\\Users\\Nicole\\Downloads\\Release-24.08.0-0\\poppler-24.08.0\\Library\\bin"
 pages = convert_from_path(pdf_file, poppler_path=poppler_path)
 print(f"Converted {len(pages)} PDF pages to images.")
@@ -44,17 +44,20 @@ print("Gemini model loaded:", model)
 #   <chunk_text>必需有</chunk_text>
 # </chunk>
 CHUNKING_PROMPT = """\
-將以下頁面進行 OCR 文字辨識，並轉換為 Markdown 格式。其中的表格部分請使用 HTML 格式呈現。
+OCR the following page into Markdown. Tables should be formatted as HTML.
+Do not surround your output with triple backticks.
+Chunk the document into sections of roughly 250 - 1000 words.
 
-OCR 完成後，請將文件內容清楚地拆分成問答組合，並忽略任何與個人心得、回饋或經驗分享相關的內容（例如：「心得分享」或類似標題的部分）。
+Give every chunk_text a summerized title, if you can't find a title, use "".
+use traditional chinese language.
 
-每個問答組合請以簡明易懂的方式總結，以以下格式呈現：
+For each chunk, output the following format:
 <chunk>
-    <chunk_title>... (optional) ...</chunk_title>
-    <chunk_text>... (required) ...</chunk_text>
+<chunk_title>... (optional) ...</chunk_title>
+<chunk_text>... (required) ...</chunk_text>
 </chunk>
 
-保留所有有意義的內容，僅排除與個人心得分享有關的部分。
+Preserve as much content as possible, including headings, tables, etc.
 """
 
 def process_page(page_num, image_b64):
@@ -127,11 +130,14 @@ respondent_match = re.search(respondent_pattern, full_text)
 if respondent_match:
     current_respondent = respondent_match.group(1).strip()
     current_respondent = re.sub(r"[（）\(\)【】\[\]]", "", current_respondent)
-    current_respondent = current_respondent.replace("、", ", ")  
+    current_respondent = current_respondent.replace("、", ", ")
+    # 如果有空格，只取空格前的內容
+    current_respondent = current_respondent.split()[0]
     print(f"✅ 找到受訪者: {current_respondent}")  # Debug
     document_respondents = current_respondent
 else:
     document_respondents = "未知"
+    print("❌ 找不到受訪者")  # Debug
 
     
 # 處理整份 PDF
@@ -168,17 +174,17 @@ for i in range(len(all_chunks)):
 
 # ====== 6. 儲存最終結果 ======
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-index_name= "chunking-gemini-dotproduct"
+index_name= "chunking-gemini-dotproduct-2"
 # 建立無伺服器索引 (建立一次即可)
-pc.create_index(
-    name=index_name,
-    dimension=1024, 
-    metric="dotproduct", 
-    spec=ServerlessSpec(
-        cloud="aws",
-        region="us-east-1"
-    ) 
-)
+# pc.create_index(
+#     name=index_name,
+#     dimension=1024, 
+#     metric="dotproduct", 
+#     spec=ServerlessSpec(
+#         cloud="aws",
+#         region="us-east-1"
+#     ) 
+# )
 
 vector_list = []
 for idx,chunk_data in enumerate(all_chunks):

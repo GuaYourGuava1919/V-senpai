@@ -12,7 +12,7 @@ load_dotenv()
 
 # 初始化 Pinecone
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-index_name = "chunking-gemini-dotproduct"
+index_name = "chunking-gemini-dotproduct-2"
 index = pc.Index(index_name)
 
 
@@ -88,4 +88,4 @@ def vector_search_light(user_input: str) -> dict:
         raise RuntimeError(f"Error during vector search: {str(e)}")
 
 
-vector_search_light("從系統分析與設計課程中遇到甚麼問題？")
+# vector_search_light("從系統分析與設計課程中遇到甚麼問題？")
