@@ -118,7 +118,7 @@ const handleSignUp = () => {
 
 <template>
     <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-        <el-card style="max-width: 550px; background-color: #6C63FF;" shadow="always">
+        <el-card style="max-width: 550px; background-color: #AA60C8;" shadow="always">
             <el-form :model="form" label-width="auto" style="margin: 20px;">
                 <el-form-item label="電子郵件" required>
                     <el-input v-model="form.email" />

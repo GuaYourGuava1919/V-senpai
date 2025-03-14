@@ -122,12 +122,12 @@ const handleClick = async () => {
           </div>
         </el-row>
         <el-row style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-          <div class="" style="height: calc(100vh*0.1) ; width: 80%; text-align: center; display: flex; justify-content: space-around; align-items: center;">
+          <div class="" style=" height: calc(100vh*0.1) ; width: 100%; text-align: center; display: flex; justify-content: center; gap: 10px; align-items: center;">
             <el-input
               v-model="text"
-              style="width: 80%;"
+              style="width: 80%; padding: 10px;"
               size="large"
-              maxlength="100"
+              maxlength="200"
               placeholder="輸入問題"
               show-word-limit
               type="text"
@@ -135,7 +135,7 @@ const handleClick = async () => {
               
             />
             <el-button
-              color="#6C63FF"
+              color="#AA60C8"
               @click="handleClick">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z" fill="white"/></svg>
           </el-button>
@@ -149,7 +149,7 @@ const handleClick = async () => {
 </template>
 
 <style lang="scss">
-  $color-primary: #6C63FF;
+  $color-primary: #AA60C8;
 
   *{
     margin: 0;
@@ -161,7 +161,7 @@ const handleClick = async () => {
     height: 100vh;
   }
   .slogan{
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: $color-primary;
   }

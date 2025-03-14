@@ -82,6 +82,7 @@ onUnmounted(() => {
     border-radius:20px ;
     border: 2px solid #ccc;
     padding: 20px;
+    // background-color: #F8F3D9;
 }
 
 .chat-windows {

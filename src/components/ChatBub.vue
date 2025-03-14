@@ -2,7 +2,7 @@
   <div>
     <!-- {{ isLoading }} -->
     <!-- 使用者訊息 -->
-    <div class="chat-bub" v-if="props.chat.question" style="justify-content: flex-end;">
+    <div class="chat-bub" v-if="props.chat.question" style="justify-content: flex-end; align-items: end;">
       <div class="time">{{ formattedTime }}</div>
       <div class="user_content">
         <p>{{ chat.question }}</p>
@@ -11,19 +11,24 @@
     <!-- Bot 訊息 -->
     <div class="chat-bub" 
          v-if="props.chat.response" 
-         style="justify-content: flex-start;">
-      <div class="bot_content">
-        <div class="markdown-content" v-html="parsedMarkdown"></div>
-        <el-divider />
-        <div class="respondent-list">
-          內容來自於學長姐：
-          <span v-if="chat.respondents && chat.respondents.length > 0">
-            {{ chat.respondents.join(', ') }}
-          </span>
-          <span v-else>未知</span>
-        </div>
+         style="justify-content: flex-start; align-items: start;">
+      <div class="chat-bub-avatar" >
+        <img src="/logo.png" alt="" height="40" width="40"/>
       </div>
-      <div class="time">{{ formattedTime }}</div>
+      <div class="" style="display: flex; align-items: end;">
+          <div class="bot_content">
+          <div class="markdown-content" v-html="parsedMarkdown"></div>
+          <el-divider />
+          <div class="respondent-list">
+            內容來自於學長姐：
+            <span v-if="chat.respondents && chat.respondents.length > 0">
+              {{ chat.respondents.join(', ') }}
+            </span>
+            <span v-else>未知</span>
+          </div>
+        </div>
+        <div class="time">{{ formattedTime }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -71,13 +76,23 @@ watch(() => props.chat.response, (newResponse) => {
 .chat-bub {
   display: flex;
   margin-top: 10px;
-  align-items: end;
+  // align-items: start;
+  
+  .chat-bub-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-right: 10px;
+    padding: 10px;
+  }
   
   .bot_content {
-    background-color: #d5d5d5;
+    background-color: #F8F3D9;
     color: #444545;
     padding: 40px;
-    border-radius: 10px;
+    border-radius: 30px;
     max-width: 55%;
     overflow-x: auto;
     .markdown-content {
@@ -94,28 +109,22 @@ watch(() => props.chat.response, (newResponse) => {
     .respondent-list{
       margin-top: 20px;
       font-size: 18px;
-      color: #6C63FF;
+      color: #AA60C8;
       font-weight: 600;
       span{
-        color: #FFA726;
+        color: #FFA725;
       }
     }
     .el-divider--horizontal{
-      border-top: 1px solid #6C63FF;
+      border-top: 1px solid #AA60C8;
     }
-  }
-  
-  .respondent {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
   }
 
   .user_content {
-    background-color: #d5d5d5;
+    background-color: #F8F3D9;
     color: #444545;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 30px;
     max-width: 40%;
   }
   
