@@ -44,40 +44,48 @@ const handleSignIn = () => {
 </script>
 
 <template>
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-        <el-card style="max-width: 550px; background-color: #AA60C8;" shadow="always">
+    <div class="sign-in-container">
+        <div class="">
+            <img src="/vsenpai-new.png" alt="logo" style=" height: 200px; margin: 20px;"/>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+            <el-card style="max-width: 550px; background-color: #AA60C8;" shadow="always">
+                <el-form :model="form" label-width="auto" style="margin: 20px;">
+                    <el-form-item label="電子郵件" required>
+                        <el-input v-model="form.email" />
+                    </el-form-item>
 
-            <el-form :model="form" label-width="auto" style="margin: 20px;">
-                <el-form-item label="電子郵件" required>
-                    <el-input v-model="form.email" />
-                </el-form-item>
+                    <el-form-item label="密碼"  required> 
+                        <el-input v-model="form.pwd" type="password"/>
+                    </el-form-item>
+                </el-form>
 
-                <el-form-item label="密碼"  required> 
-                    <el-input v-model="form.pwd" type="password"/>
-                </el-form-item>
-            </el-form>
+                <div class="" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
 
-            <div class="" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                    <div class="" style="display: flex; justify-content: center;" @click="handleSignIn">
+                        <el-button round style="background-color: #FFA726; color: white;">登入</el-button>
+                    </div>
 
-                <div class="" style="display: flex; justify-content: center;" @click="handleSignIn">
-                    <el-button round style="background-color: #FFA726; color: white;">登入</el-button>
+                    <!-- 沒有帳號就註冊 -->
+                    <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
+                        <p>還沒有帳號？</p>
+                        <router-link to="/register">註冊</router-link>
+                    </div>
                 </div>
-
-                <!-- 沒有帳號就註冊 -->
-                <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
-                    <p>還沒有帳號？</p>
-                    <router-link to="/register">註冊</router-link>
-                </div>
-
-            </div>
-            
-
-        </el-card>
+            </el-card>
+        </div>
     </div>
 </template>
 
 
 <style lang="scss">
+.sign-in-container {
+    // background-color: #AA60C8;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 .el-form-item__label {
     color: #fff;
