@@ -58,7 +58,7 @@ const getChatHistory = () => {
         return;
     }
 
-    const q = query(collection(db, `users/${uid}/conversations/chat01/messages`), orderBy("timestamp"));
+    const q = query(collection(db, `users/${uid}/conversations/chat02/messages`), orderBy("timestamp"));
     unsubscribe = onSnapshot(q, (snapshot) => {
         chats.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         scrollToBottom();

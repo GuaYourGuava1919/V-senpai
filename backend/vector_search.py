@@ -12,11 +12,12 @@ load_dotenv()
 
 # 初始化 Pinecone
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-index_name = "chunking-gemini-dotproduct-2"
+index_name = "myindex"
 index = pc.Index(index_name)
 
 
 co = cohere.ClientV2()
+
 
 # 載入 SentenceTransformer 模型（已去掉 torch 和 transformers）
 # model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
@@ -65,27 +66,59 @@ def vector_search_light(user_input: str) -> dict:
         vector = response.embeddings.float_[0]
 
         results = index.query(
-            namespace="ns1",
+            namespace="interview",
             vector=vector,
             top_k=3,
             include_values=False,
             include_metadata=True,
         )
 
-        print(f"查詢結果: {results}")
+        # print(f"查詢結果: {results}")
+        
+        
+        question = [match["metadata"]["question"] for match in results["matches"]]
+        answer = [match["metadata"]["answer"] for match in results["matches"]]
+        interviewee = [match["metadata"]["interviewee"] for match in results["matches"]]
+        source_file = [match["metadata"]["source_file"] for match in results["matches"]]
+        page_number = [match["metadata"]["page_number"] for match in results["matches"]]
+        score = [match["score"] for match in results["matches"]]
+        
+        #將問題答案組合成一個字串
+        question = " ".join(question)
+        answer = " ".join(answer)
+        
+        #去除重複的interviewee
+        interviewee = list(set(interviewee))
+        
+        #去除重複的source_file
+        source_file = list(set(source_file))
+        
+        #去除重複的page_number
+        page_number = list(set(page_number))
+        
+        #平均分數
+        avg_score = sum(score) / len(score) if score else 0
+        
+        print(f"問題: {question}")
+        print(f"答案: {answer}")
+        print(f"受訪者: {interviewee}")
+        print(f"來源檔案: {source_file}")
+        print(f"頁碼: {page_number}")
+        print(f"分數: {avg_score}")
 
-        # 修正處：安全地存取 metadata
-        title = [match["metadata"].get("title", "Undefined") for match in results["matches"]]
-        texts = [match["metadata"].get("text", "") for match in results["matches"]]
-        respondents = [match["metadata"].get("respondents", "") for match in results["matches"]]
-        scores = [match.get("score", 0) for match in results["matches"]]
-
-        combined_text = " ".join(texts)
-
-        return {"combined_text": combined_text, "respondents": respondents, "score": scores, "titles": title}
+        return {
+            "question": question,
+            "answer": answer,
+            "interviewee": interviewee,
+            "source_file": source_file,
+            "page_number": page_number,
+            "score": avg_score
+        }
 
     except Exception as e:
         raise RuntimeError(f"Error during vector search: {str(e)}")
 
 
-# vector_search_light("從系統分析與設計課程中遇到甚麼問題？")
+if __name__ == "__main__":
+    # 測試範例
+    vector_search_light("如何追蹤組員進度")

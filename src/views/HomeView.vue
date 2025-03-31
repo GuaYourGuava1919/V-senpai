@@ -29,7 +29,7 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
 
     if (sender === "user") {
       // ✅ 建立新的對話記錄 (使用 collection)
-      const collectionRef = collection(db, `users/${uid}/conversations/chat01/messages`);
+      const collectionRef = collection(db, `users/${uid}/conversations/chat02/messages`);
       // 👇 必須存下 addDoc 回傳值 (文件參考)
       const docRef = await addDoc(collectionRef, {
         question: message,
@@ -48,7 +48,7 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
     } 
     else if (sender === "bot" && conversationId) {
       // ✅ 更新指定文件 (使用 doc)
-      const docRef = doc(db, `users/${uid}/conversations/chat01/messages/${conversationId}`);
+      const docRef = doc(db, `users/${uid}/conversations/chat02/messages/${conversationId}`);
       await updateDoc(docRef, {
         response: message,
         respondents: respondents,
@@ -68,8 +68,6 @@ const average = (numbers) => {
       return numbers.reduce((acc, num) => acc + num, 0) / numbers.length;
 }
 
-
-
 const handleClick = async () => {
   if (text.value) {
     countStore.setLoading(true);
@@ -79,7 +77,6 @@ const handleClick = async () => {
 
       // 2. 發送請求到 Flask API
       const response = await fetch('/api/chat', {
-
       // const response = await fetch('http://127.0.0.1:5000/api/chat', {
         method: 'POST',
         headers: {
@@ -89,20 +86,12 @@ const handleClick = async () => {
       });
 
       const data = await response.json(); // 將回應轉換為 JSON 格式
-
+      console.log("完整回傳資料：", data);
       console.log('機器人的回應', data.reply || 'No response body');
-
-      //檢查data.reply[1]中的值是否重複
-      let filtedRespondents = [];
-      if (Array.isArray(data.reply[1]) && data.reply[1].length > 0) {
-        filtedRespondents = data.reply[1].filter((item, index) => data.reply[1].indexOf(item) === index);
-      }
-
-      console.log('平均值', average(data.reply[2]));
 
       // 3. 儲存機器人回應到 Firebase，使用相同 conversationId
       if (Array.isArray(data.reply) && data.reply.length > 0) {
-        await saveMessageToFirebase(uid, data.reply[0], "bot", conversationId, filtedRespondents, data.reply[3], average(data.reply[2]));
+        await saveMessageToFirebase(uid, data.reply[0], "bot", conversationId, data.reply[1], data.reply[5] ,data.reply[2]);
         console.log("成功儲存機器人的回應", data.reply[0]);
       }
 

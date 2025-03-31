@@ -1,0 +1,16 @@
+[
+  {
+    "filename": "doc1.pdf",
+    "text_length": 4790,
+    "chunk_count": 9,
+    "used_method": "regex",
+    "sample_question": "2. 從系統分析與設計課程中遇到甚麼問題?"
+  },
+  {
+    "filename": "doc2.pdf",
+    "text_length": 4168,
+    "chunk_count": 3,
+    "used_method": "regex",
+    "sample_question": "10. 使用哪個語言、資料庫開發？跟SA 所使用的㇐樣嗎？為何？優缺點是？"
+  }
+]

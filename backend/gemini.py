@@ -16,7 +16,7 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 co = cohere.Client(COHERE_API_KEY)
 
 # ====== PDF 轉圖片部分 (範例) ======
-pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc6.pdf"
+pdf_file = "C:/Users/Nicole/Desktop/vue-project/files/doc15.pdf"
 poppler_path = r"C:\\Users\\Nicole\\Downloads\\Release-24.08.0-0\\poppler-24.08.0\\Library\\bin"
 pages = convert_from_path(pdf_file, poppler_path=poppler_path)
 print(f"Converted {len(pages)} PDF pages to images.")
@@ -125,21 +125,42 @@ document = loader.load()
 full_text = "\n\n".join([page.page_content for page in document])
 
 current_respondent = "未知"
-respondent_pattern = r"(?:受訪者姓名|學長姐訪談受訪者姓名|受訪者)\s*[:：]?\s*([\u4e00-\u9fa5、，, ]+)"
+respondent_pattern = r"(?:受訪者姓名|學長姐訪談受訪者姓名|受訪者)\s*[:：]?\s*(.+)"
 respondent_match = re.search(respondent_pattern, full_text)
+
 if respondent_match:
     current_respondent = respondent_match.group(1).strip()
-    current_respondent = re.sub(r"[（）\(\)【】\[\]]", "", current_respondent)
-    current_respondent = current_respondent.replace("、", ", ")
-    # 如果有空格，只取空格前的內容
-    current_respondent = current_respondent.split()[0]
-    print(f"✅ 找到受訪者: {current_respondent}")  # Debug
-    document_respondents = current_respondent
+    
+    # 移除括號內容
+    current_respondent = re.sub(r"[（(【\[].*?[）)】\]]", "", current_respondent)
+
+    # 移除系級資訊 (例如: 資管三甲)
+    current_respondent = re.sub(r"[\u4e00-\u9fa5]{2,6}[一二三四五六七八九十甲乙丙丁戊己庚辛壬癸]+", "", current_respondent)
+
+    # 移除稱謂（學姐、學長、同學、老師、教授）
+    current_respondent = re.sub(r"(學姐|學長|同學|老師|教授)", "", current_respondent)
+
+    current_respondent = current_respondent.strip()
+
+    # 處理是否有頓號
+    if re.search(r"[、，,]", current_respondent):
+        names = [name.strip() for name in re.split(r"[、，,]+", current_respondent)]
+        valid_names = [name for name in names if re.fullmatch(r"[\u4e00-\u9fa5]{2,4}", name)]
+        document_respondents = ", ".join(valid_names) if valid_names else "未知"
+    else:
+        # 空格情況只取第一個
+        first_name = current_respondent.split()[0]
+        if re.fullmatch(r"[\u4e00-\u9fa5]{2,4}", first_name):
+            document_respondents = first_name
+        else:
+            document_respondents = "未知"
+
+    print(f"✅ 找到受訪者: {document_respondents}")  # Debug
 else:
     document_respondents = "未知"
     print("❌ 找不到受訪者")  # Debug
 
-    
+
 # 處理整份 PDF
 all_chunks = []
 for i, b64_str in images_b64.items():
