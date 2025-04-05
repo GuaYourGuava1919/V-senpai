@@ -25,7 +25,7 @@ const handleSignIn = () => {
             const user = userCredential.user;
             const idToken = await user.getIdToken();
 
-            console.log("Login success");
+            // console.log("Login success");
 
             // 儲存 Token 或進一步操作
             localStorage.setItem('token', idToken);
@@ -45,11 +45,11 @@ const handleSignIn = () => {
 
 <template>
     <div class="sign-in-container">
-        <div class="">
+        <!-- <div class="">
             <img src="/vsenpai-new.png" alt="logo" style=" height: 200px; margin: 20px;"/>
-        </div>
+        </div> -->
         <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-            <el-card style="max-width: 550px; background-color: #AA60C8;" shadow="always">
+            <el-card style="max-width: 550px; background-color: #9FB3DF;" shadow="always">
                 <el-form :model="form" label-width="auto" style="margin: 20px;">
                     <el-form-item label="電子郵件" required>
                         <el-input v-model="form.email" />
@@ -80,7 +80,6 @@ const handleSignIn = () => {
 
 <style lang="scss">
 .sign-in-container {
-    // background-color: #AA60C8;
     height: 100vh;
     display: flex;
     justify-content: center;

@@ -66,7 +66,7 @@ def vector_search_light(user_input: str) -> dict:
         vector = response.embeddings.float_[0]
 
         results = index.query(
-            namespace="interview",
+            namespace="interview-rag",
             vector=vector,
             top_k=3,
             include_values=False,
@@ -76,43 +76,46 @@ def vector_search_light(user_input: str) -> dict:
         # print(f"查詢結果: {results}")
         
         
-        question = [match["metadata"]["question"] for match in results["matches"]]
-        answer = [match["metadata"]["answer"] for match in results["matches"]]
+        title = [match["metadata"]["title"] for match in results["matches"]]
+        content = [match["metadata"]["content"] for match in results["matches"]]
         interviewee = [match["metadata"]["interviewee"] for match in results["matches"]]
-        source_file = [match["metadata"]["source_file"] for match in results["matches"]]
-        page_number = [match["metadata"]["page_number"] for match in results["matches"]]
+        source = [match["metadata"]["source"] for match in results["matches"]]
+        page = [match["metadata"]["page"] for match in results["matches"]]
         score = [match["score"] for match in results["matches"]]
         
         #將問題答案組合成一個字串
-        question = " ".join(question)
-        answer = " ".join(answer)
+        title = " ".join(title)
+        content = " ".join(content)
         
         #去除重複的interviewee
-        interviewee = list(set(interviewee))
+        # interviewee = list(set(interviewee))
         
         #去除重複的source_file
-        source_file = list(set(source_file))
+        # source = list(set(source))
         
         #去除重複的page_number
-        page_number = list(set(page_number))
+        # page = list(set(page))
         
         #平均分數
         avg_score = sum(score) / len(score) if score else 0
         
-        print(f"問題: {question}")
-        print(f"答案: {answer}")
-        print(f"受訪者: {interviewee}")
-        print(f"來源檔案: {source_file}")
-        print(f"頁碼: {page_number}")
-        print(f"分數: {avg_score}")
-
+        # print(f"查詢結果: {results}")
+        # print(f"問題: {user_input}")
+        # print(f"標題: {title}")
+        # print(f"內容: {content}")
+        # print(f"受訪者: {interviewee}")
+        # print(f"來源: {source}")
+        # print(f"頁碼: {page}")
+        # print(f"分數: {avg_score}")
+        
+        # 返回查詢結果
         return {
-            "question": question,
-            "answer": answer,
+            "question": user_input,
+            "answer": content,
             "interviewee": interviewee,
-            "source_file": source_file,
-            "page_number": page_number,
-            "score": avg_score
+            "source_file": source,
+            "page_number": page,
+            "score": avg_score,
         }
 
     except Exception as e:

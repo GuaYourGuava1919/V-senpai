@@ -54,7 +54,7 @@ const scrollToBottom = () => {
 
 const getChatHistory = () => {
     if (!uid) {
-        console.warn('尚未登入，無法取得聊天紀錄');
+        // console.warn('尚未登入，無法取得聊天紀錄');
         return;
     }
 
