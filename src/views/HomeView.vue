@@ -29,7 +29,7 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
 
     if (sender === "user") {
       //建立新的對話記錄 (使用 collection)
-      const collectionRef = collection(db, `users/${uid}/conversations/chat02/messages`);
+      const collectionRef = collection(db, `users/${uid}/conversations/chat01/messages`);
       //必須存下 addDoc 回傳值 (文件參考)
       const docRef = await addDoc(collectionRef, {
         question: message,
@@ -48,7 +48,7 @@ const saveMessageToFirebase = async (uid, message, sender, conversationId = null
     } 
     else if (sender === "bot" && conversationId) {
       //更新指定文件 (使用 doc)
-      const docRef = doc(db, `users/${uid}/conversations/chat02/messages/${conversationId}`);
+      const docRef = doc(db, `users/${uid}/conversations/chat01/messages/${conversationId}`);
       await updateDoc(docRef, {
         response: message,
         respondents: respondents,
