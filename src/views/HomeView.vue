@@ -102,7 +102,7 @@ const handleClick = async () => {
           "bot",                 // sender
           conversationId || null,
           respondents,           // interviewee
-          info.answer || "",     // 原始回覆內容（原始文字）
+          info.content || "",     // 原始回覆內容（原始文字）
           info.score || 0        // 分數（平均或相似度）
         );
 

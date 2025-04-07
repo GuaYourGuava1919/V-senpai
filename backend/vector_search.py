@@ -99,21 +99,14 @@ def vector_search_light(user_input: str) -> dict:
         #平均分數
         avg_score = sum(score) / len(score) if score else 0
         
-        # print(f"查詢結果: {results}")
-        # print(f"問題: {user_input}")
-        # print(f"標題: {title}")
-        # print(f"內容: {content}")
-        # print(f"受訪者: {interviewee}")
-        # print(f"來源: {source}")
-        # print(f"頁碼: {page}")
-        # print(f"分數: {avg_score}")
         
         # 返回查詢結果
         return {
             "question": user_input,
-            "answer": content,
+            "content": content,
+            "title": title,
             "interviewee": interviewee,
-            "source_file": source,
+            "source": source,
             "page_number": page,
             "score": avg_score,
         }
